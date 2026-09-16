@@ -1,0 +1,766 @@
+/* ==========================================================================
+   Aurelia Beauty Salon — Customer area
+   Shared by dashboard.html and profile.html (and any future /customer/* page)
+   Palette + type lifted straight from the login screen.
+   ========================================================================== */
+
+:root {
+  /* -- color: base ----------------------------------------------------- */
+  --bg-deep: #2b1521;
+  --bg-deeper: #180e15;
+  --panel-bg: rgba(37, 19, 28, 0.74);
+  --panel-bg-solid: #241420;
+  --panel-border: rgba(255, 255, 255, 0.09);
+  --panel-border-soft: rgba(255, 255, 255, 0.06);
+  --panel-shadow: 0 24px 60px rgba(10, 3, 8, 0.45);
+
+  /* -- color: text ------------------------------------------------------ */
+  --text-cream: #f5ecee;
+  --text-muted: #c9a5b1;
+  --text-faint: #93707c;
+
+  /* -- color: accent (pink, from the login "Log in" button) ------------ */
+  --pink-100: #f6dbe4;
+  --pink-300: #e893ad;
+  --pink-500: #d5688f;
+  --pink-700: #ad4d70;
+  --pink-glow: rgba(232, 147, 173, 0.38);
+
+  /* -- color: secondary accents for stat icons -------------------------- */
+  --gold-300: #e3bd7d;
+  --violet-300: #b49ce0;
+
+  /* -- type --------------------------------------------------------------*/
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* -- shape -------------------------------------------------------------*/
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-pill: 999px;
+
+  --sidebar-w: 264px;
+
+  /* -- background photo --------------------------------------------------
+     Point this at your image. Drop the file in
+     src/main/resources/static/images/ and update the filename below —
+     that's the only edit needed, .bg-photo just references this variable. */
+  --hero-photo: url('/salon5.jpg');
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-cream);
+  background: var(--bg-deep);
+  position: relative;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-cream);
+}
+
+p { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+button, input {
+  font-family: var(--font-sans);
+}
+
+/* ==========================================================================
+   Background: painterly pink/white wash, dark-tinted to match the login card
+   ========================================================================== */
+
+.bg-photo {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background-image: var(--hero-photo);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* shows briefly while the photo loads, and if the path above is wrong */
+  background-color: var(--bg-deeper);
+}
+
+.bg-tint {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: rgba(24, 13, 20, 0.66);
+}
+
+.bg-blob {
+  position: fixed;
+  z-index: -1;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.bg-blob--top {
+  top: -180px;
+  left: -160px;
+  background: radial-gradient(circle, var(--pink-100) 0%, transparent 70%);
+}
+
+.bg-blob--bottom {
+  bottom: -220px;
+  right: -180px;
+  background: radial-gradient(circle, var(--violet-300) 0%, transparent 72%);
+  opacity: 0.22;
+}
+
+/* ==========================================================================
+   Mobile sidebar overlay
+   ========================================================================== */
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 6, 10, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 30;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   App shell
+   ========================================================================== */
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* -- Sidebar --------------------------------------------------------------*/
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--panel-border-soft);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 40;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-cream);
+}
+
+.sidebar-brand svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--pink-300);
+  flex-shrink: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 500;
+  border-left: 2px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-link svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-cream);
+}
+
+.nav-link--active {
+  background: linear-gradient(135deg, rgba(232, 147, 173, 0.22), rgba(213, 104, 143, 0.12));
+  color: var(--pink-100);
+  border-left-color: var(--pink-300);
+}
+
+.sidebar-logout {
+  margin-top: auto;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-ghost svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+.btn-ghost:hover {
+  color: var(--text-cream);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.btn-ghost--block {
+  width: 100%;
+  justify-content: center;
+}
+
+/* -- Main column ------------------------------------------------------- */
+
+.app-main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  position: relative;
+  padding: 0 48px 96px;
+}
+
+.topbar {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--panel-border-soft);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-cream);
+  cursor: pointer;
+}
+
+.menu-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.topbar-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dashboard {
+  max-width: 1080px;
+  padding-top: 56px;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.dashboard-header h1 {
+  font-size: clamp(1.7rem, 2.4vw, 2.2rem);
+}
+
+.dashboard-header .subtitle {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+/* ==========================================================================
+   Overview: stat cards pinned to the viewport corners
+   ========================================================================== */
+
+.stat-corners {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.stat-card {
+  position: fixed;
+  width: 220px;
+  padding: 20px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+.stat-card--top-right { top: 28px; right: 32px; }
+.stat-card--bottom-left { bottom: 28px; left: calc(var(--sidebar-w) + 32px); }
+.stat-card--bottom-right { bottom: 28px; right: 32px; }
+
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.stat-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke-width: 1.7;
+}
+
+.stat-icon--loyalty { background: rgba(232, 147, 173, 0.18); }
+.stat-icon--loyalty svg { stroke: var(--pink-300); }
+
+.stat-icon--tier { background: rgba(227, 189, 125, 0.18); }
+.stat-icon--tier svg { stroke: var(--gold-300); }
+
+.stat-icon--spent { background: rgba(180, 156, 224, 0.18); }
+.stat-icon--spent svg { stroke: var(--violet-300); }
+
+.stat-label {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-cream);
+}
+
+.stat-value--tier { color: var(--gold-300); }
+
+/* -- floating quick action ------------------------------------------------*/
+
+.corner-widget {
+  position: fixed;
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  border-radius: var(--radius-pill);
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.corner-widget svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.corner-widget--primary {
+  right: 40px;
+  bottom: 112px;
+  background: linear-gradient(135deg, var(--pink-300), var(--pink-500));
+  color: #3a1220;
+  box-shadow: 0 14px 32px var(--pink-glow);
+}
+
+.corner-widget--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px var(--pink-glow);
+}
+
+/* ==========================================================================
+   Shared form controls (profile forms, and anywhere else that needs them)
+   ========================================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group--full { grid-column: 1 / -1; }
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-cream);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 84px;
+  font-family: var(--font-sans);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--pink-300);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.form-group input:disabled {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.form-hint {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 28px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--pink-300), var(--pink-500));
+  color: #3a1220;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 14px 30px var(--pink-glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px var(--pink-glow);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 26px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-cream);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* -- flash messages ---------------------------------------------------- */
+
+.form-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  margin-bottom: 22px;
+}
+
+.form-alert--success {
+  background: rgba(148, 210, 172, 0.14);
+  border: 1px solid rgba(148, 210, 172, 0.3);
+  color: #bfe9cf;
+}
+
+.form-alert--error {
+  background: rgba(214, 111, 130, 0.14);
+  border: 1px solid rgba(214, 111, 130, 0.32);
+  color: #f3b9c4;
+}
+
+/* ==========================================================================
+   Profile page
+   ========================================================================== */
+
+.profile-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-card {
+  border-radius: var(--radius-xl);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 32px;
+}
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.profile-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--pink-300), var(--pink-700));
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-cream);
+}
+
+.profile-identity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-identity-info h2 {
+  font-size: 1.3rem;
+}
+
+.profile-identity-info .profile-email {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(227, 189, 125, 0.16);
+  color: var(--gold-300);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.profile-meta-row {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-chip .meta-value {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.meta-chip .meta-label {
+  font-size: 0.76rem;
+  color: var(--text-faint);
+}
+
+.profile-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.card-heading {
+  font-size: 1.08rem;
+  margin-bottom: 22px;
+}
+
+.card-subtext {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  margin-top: -14px;
+  margin-bottom: 22px;
+  display: block;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .app-main {
+    margin-left: 0;
+    padding: 0 20px 80px;
+  }
+
+  .topbar {
+    display: flex;
+    margin: 0 -20px 8px;
+  }
+
+  .dashboard {
+    padding-top: 28px;
+  }
+
+  .stat-corners {
+    position: static;
+  }
+
+  .stat-card {
+    position: static;
+    width: auto;
+    margin-bottom: 14px;
+  }
+
+  .corner-widget--primary {
+    position: static;
+    display: flex;
+    width: 100%;
+    margin-top: 8px;
+    box-sizing: border-box;
+  }
+
+  .form-grid,
+  .profile-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-meta-row {
+    margin-left: 0;
+    gap: 20px;
+  }
+
+  .profile-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 520px) {
+  .profile-identity {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

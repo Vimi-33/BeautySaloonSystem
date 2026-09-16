@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurelia Beauty Salon - Customer Portal</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plum: {
+                            950: '#150913',
+                            900: '#261323',
+                            800: '#341a30',
+                            700: '#462341',
+                            300: '#e5a4be',
+                            200: '#f2c4d5',
+                        },
+                        roseGold: '#df8ca9',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #150913;
+            color: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-sidebar {
+            background: rgba(21, 9, 19, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-topbar {
+            background: rgba(21, 9, 19, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glow-btn {
+            background: linear-gradient(135deg, #df8ca9 0%, #e5a4be 100%);
+            color: #150913;
+            box-shadow: 0 0 25px rgba(223, 140, 169, 0.35);
+            transition: all 0.3s ease;
+        }
+
+        .glow-btn:hover {
+            box-shadow: 0 0 40px rgba(223, 140, 169, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .outline-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        .outline-pill:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(223, 140, 169, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(21, 9, 19, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(229, 164, 190, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(223, 140, 169, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-link-active {
+            background: rgba(223, 140, 169, 0.12);
+            border-left: 3px solid #df8ca9;
+            color: #df8ca9 !important;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen bg-plum-950 text-white selection:bg-roseGold selection:text-plum-950 overflow-x-hidden">
+
+<!-- HIDDEN DOM IMAGE LOADER -->
+<img id="bgSourceImg" th:src="@{/girl3.jpg}" src="/girl3.jpg" class="hidden" alt="Source Image" />
+
+<!-- ASCII CANVAS -->
+<canvas id="bgCanvas"></canvas>
+
+<div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-roseGold/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-1/4 right-10 w-[35rem] h-[35rem] bg-plum-700/25 rounded-full blur-[160px]"></div>
+</div>
+
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"></div>
+
+<div class="relative z-10 flex min-h-screen">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 z-50 glass-sidebar transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between shrink-0">
+        <div class="p-6">
+            <a href="#" class="flex items-center gap-3 group pb-8 border-b border-white/10">
+                <span class="text-roseGold text-2xl">🌸</span>
+                <span class="font-serif font-semibold text-xl tracking-tight text-white group-hover:text-roseGold transition-colors">
+                        Aurelia Salon
+                    </span>
+            </a>
+
+            <nav class="mt-8 space-y-2">
+                <a th:href="@{/customer/dashboard}" href="#"
+                   th:classappend="${activePage == 'overview' || activePage == null} ? 'nav-link-active' : ''"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                    <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11.5L12 4l8 7.5M6 10v9h12v-9"/>
+                    </svg>
+                    <span>Overview</span>
+                </a>
+
+                <a th:href="@{/customer/appointments}" href="#"
+                   th:classappend="${activePage == 'appointments'} ? 'nav-link-active' : ''"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                    <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="3" y="5" width="18" height="16" rx="2" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5h18M8 3v3M16 3v3"/>
+                    </svg>
+                    <span>Appointments</span>
+                </a>
+
+                <a th:href="@{/customer/staff}" href="#"
+                   th:classappend="${activePage == 'staff'} ? 'nav-link-active' : ''"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                    <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11a3.5 3.5 0 10-3.5-3.5M8.5 11a3 3 0 10-3-3M2.5 19c.6-2.6 2.9-4.3 6-4.3s5.4 1.7 6 4.3M13 14.9c2.6.2 4.6 1.8 5.1 4.1"/>
+                    </svg>
+                    <span>Staff</span>
+                </a>
+
+                <a th:href="@{/customer/services}" href="#"
+                   th:classappend="${activePage == 'services'} ? 'nav-link-active' : ''"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                    <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4L12 3zM19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/>
+                    </svg>
+                    <span>Services</span>
+                </a>
+
+                <a th:href="@{/customer/profile}" href="#"
+                   th:classappend="${activePage == 'profile'} ? 'nav-link-active' : ''"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                    <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="12" cy="8" r="3.4" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5"/>
+                    </svg>
+                    <span>Profile</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-6 border-t border-white/10">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full outline-pill text-xs font-mono tracking-wider uppercase text-gray-300 hover:text-white">
+                    <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    <span>Log Out</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+        <header class="h-20 px-6 lg:px-12 flex items-center justify-between glass-topbar sticky top-0 z-30 shrink-0">
+            <div class="flex items-center gap-4">
+                <button id="menuToggle" class="lg:hidden p-2 text-gray-300 hover:text-white rounded-lg focus:outline-none" aria-label="Toggle Menu">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <span class="font-serif text-lg font-semibold text-white tracking-wide">Aurelia Dashboard</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a th:href="@{/customer/book}" href="#" class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase glow-btn flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="3" y="5" width="18" height="16" rx="2" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5h18M8 3v3M16 3v3"/>
+                    </svg>
+                    <span>Book Appointment</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 p-6 lg:p-8 flex flex-col justify-between items-end relative z-10 pointer-events-none">
+            <!-- TOP RIGHT WIDGET -->
+            <div class="glass-panel p-5 md:p-6 rounded-2xl max-w-sm w-full pointer-events-auto">
+                <div class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-roseGold backdrop-blur-md mb-2">
+                    Customer Portal
+                </div>
+                <h1 class="font-serif text-xl md:text-2xl font-semibold text-white tracking-tight leading-snug" th:text="'Welcome, ' + (${customer != null ? customer.fullName : 'Guest'})">
+                    Welcome, Guest
+                </h1>
+                <p class="mt-1.5 text-xs text-gray-300/90 font-light leading-relaxed">
+                    Explore your treatments, points, and salon activity through real-time ASCII optics.
+                </p>
+            </div>
+
+            <!-- BOTTOM RIGHT STAT CARDS -->
+            <!-- BOTTOM RIGHT STAT CARDS -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full pointer-events-auto mt-auto pt-6" aria-label="Account Summary">
+
+                <!-- LOYALTY CARD -->
+                <article class="glass-card p-4 rounded-xl flex flex-col justify-between border border-white/10 hover:border-roseGold/40 transition-all">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono text-plum-200/70 tracking-wider uppercase">Loyalty</span>
+                        <div class="p-1.5 rounded-lg bg-roseGold/10 text-roseGold">
+                            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L12 3.5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="font-serif text-2xl font-bold text-white tracking-tight"
+                           th:text="${customer != null ? customer.loyaltyPoints : '0'}">0</p>
+                        <p class="text-[10px] font-mono text-roseGold mt-1 leading-none">+10 pts per LKR 100</p>
+                    </div>
+                </article>
+
+                <!-- TIER CARD -->
+                <article class="glass-card p-4 rounded-xl flex flex-col justify-between border border-white/10 hover:border-roseGold/40 transition-all">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono text-plum-200/70 tracking-wider uppercase">Tier</span>
+                        <div class="p-1.5 rounded-lg bg-roseGold/10 text-roseGold">
+                            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8l3.5 3L12 5l4.5 6L20 8l-1.6 9H5.6L4 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="font-serif text-2xl font-bold text-roseGold tracking-tight uppercase"
+                           th:text="${customer != null ? customer.membershipTier : 'SILVER'}">SILVER</p>
+
+                        <p class="text-[10px] font-mono text-plum-200/60 mt-1 leading-none"
+                           th:text="${customer != null && customer.membershipTier == 'PLATINUM' ? 'VIP Unlocked' : 'Next Tier at 500 Pts'}">Next Tier at 500 Pts</p>
+                        </div>
+                </article>
+
+                <!-- TOTAL SPENT CARD -->
+                <article class="glass-card p-4 rounded-xl flex flex-col justify-between border border-white/10 hover:border-roseGold/40 transition-all">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono text-plum-200/70 tracking-wider uppercase">Total Spent</span>
+                        <div class="p-1.5 rounded-lg bg-roseGold/10 text-roseGold">
+                            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <rect x="3" y="6" width="18" height="13" rx="2" stroke-width="2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 6V4.8A1.8 1.8 0 018.8 3h6.4A1.8 1.8 0 0117 4.8V6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="font-serif text-2xl font-bold text-white tracking-tight"
+                           th:text="${customer != null ? 'LKR ' + #numbers.formatDecimal(customer.totalSpent, 1, 'COMMA', 2, 'POINT') : 'LKR 0.00'}">LKR 0.00</p>
+                        <p class="text-[10px] font-mono text-plum-200/60 mt-1 leading-none">Lifetime Value</p>
+                    </div>
+                </article>
+
+            </section>
+        </main>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Thymeleaf image path initialization
+    const defaultImagePath = /*[[@{/girl3.jpg}]]*/ '/girl3.jpg';
+
+    // Navigation toggle
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleMenu() {
+        sidebar.classList.toggle('-translate-x-full');
+        sidebarOverlay.classList.toggle('hidden');
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    sidebarOverlay.addEventListener('click', toggleMenu);
+
+    // ASCII Canvas Render Engine
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d', { alpha: false });
+
+    const asciiChars = ' .:-=+*#%@';
+    const fontSize = 3;
+    const strokeRadius = 140;
+    const trailLifetime = 1200;
+
+    let trail = [];
+    let sourceCanvas = null;
+    let asciiBufferCanvas = null;
+    let featherCanvas = null;
+    let maskCanvas = null;
+    let featherCtx = null;
+    let maskCtx = null;
+    let loadedImageObj = null;
+
+    function createFallbackPortraitCanvas(w, h) {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+
+        const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+        bgGrad.addColorStop(0, '#150913');
+        bgGrad.addColorStop(0.5, '#261323');
+        bgGrad.addColorStop(1, '#150913');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        const cx = w * 0.35;
+        const cy = h * 0.45;
+
+        ctx.fillStyle = 'rgba(223, 140, 169, 0.25)';
+        for(let i = 0; i < 25; i++) {
+            ctx.beginPath();
+            ctx.arc(cx + (Math.random()-0.5)*300, cy + (Math.random()-0.5)*300, 60 + Math.random()*160, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        ctx.fillStyle = '#cf879e';
+        ctx.beginPath();
+        ctx.moveTo(cx - 60, cy + 90);
+        ctx.lineTo(cx - 30, cy + 320);
+        ctx.lineTo(cx + 100, cy + 320);
+        ctx.lineTo(cx + 70, cy + 90);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#eab1c5';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 110, 150, -0.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        return canvas;
+    }
+
+    function preRenderAsciiMatrix(w, h, srcCtx) {
+        asciiBufferCanvas = document.createElement('canvas');
+        asciiBufferCanvas.width = w;
+        asciiBufferCanvas.height = h;
+        const asciiBufferCtx = asciiBufferCanvas.getContext('2d');
+
+        asciiBufferCtx.fillStyle = '#150913';
+        asciiBufferCtx.fillRect(0, 0, w, h);
+
+        let imgData;
+        try {
+            imgData = srcCtx.getImageData(0, 0, w, h).data;
+        } catch (e) {
+            console.warn('CORS restricted image data, using generated fallback portrait.');
+            const fb = createFallbackPortraitCanvas(w, h);
+            const fbCtx = fb.getContext('2d');
+            imgData = fbCtx.getImageData(0, 0, w, h).data;
+        }
+
+        const charLen = asciiChars.length;
+        asciiBufferCtx.font = `${fontSize}px monospace`;
+        asciiBufferCtx.textBaseline = 'top';
+        const charWidth = fontSize * 0.6;
+
+        for (let y = 0; y < h; y += fontSize) {
+            for (let x = 0; x < w; x += charWidth) {
+                const index = (Math.floor(y) * w + Math.floor(x)) * 4;
+                const r = imgData[index];
+                const g = imgData[index + 1];
+                const b = imgData[index + 2];
+                const a = imgData[index + 3];
+
+                if (a > 10) {
+                    const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                    const charIdx = Math.floor(brightness * (charLen - 1));
+                    const char = asciiChars[charIdx] || ' ';
+
+                    asciiBufferCtx.fillStyle = `rgba(${Math.min(255, r + 70)}, ${Math.min(255, g + 50)}, ${Math.min(255, b + 70)}, ${Math.max(0.25, brightness * 0.95)})`;
+                    asciiBufferCtx.fillText(char, x, y);
+                }
+            }
+        }
+    }
+
+    function handleResize() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    bgCanvas.width = w;
+    bgCanvas.height = h;
+
+    const domImg = document.getElementById('bgSourceImg') || loadedImageObj;
+    sourceCanvas = document.createElement('canvas');
+    sourceCanvas.width = w;
+    sourceCanvas.height = h;
+    const sCtx = sourceCanvas.getContext('2d');
+
+    let drawn = false;
+    if (domImg && domImg.complete && domImg.naturalWidth > 0) {
+        try {
+            const imgRatio = domImg.naturalWidth / domImg.naturalHeight;
+            const canvasRatio = w / h;
+            let renderW, renderH, renderX, renderY;
+
+            if (canvasRatio < imgRatio) {
+                renderH = h;
+                renderW = h * imgRatio;
+                // Shift image further right (changed offset from 0.25 to 0.45 or center-right alignment)
+                renderX = (w - renderW) * 0.15 + (w * 0.18);
+                renderY = 0;
+            } else {
+                renderW = w;
+                renderH = w / imgRatio;
+                // Add positive offset to push down/right if landscape
+                renderX = w * 0.15;
+                renderY = (h - renderH) / 2;
+            }
+
+            sCtx.fillStyle = '#150913';
+            sCtx.fillRect(0, 0, w, h);
+            sCtx.drawImage(domImg, renderX, renderY, renderW, renderH);
+            drawn = true;
+        } catch(e) {}
+    }
+
+    if (!drawn) {
+        const fb = createFallbackPortraitCanvas(w, h);
+        sCtx.drawImage(fb, 0, 0);
+    }
+
+    preRenderAsciiMatrix(w, h, sCtx);
+
+    featherCanvas = document.createElement('canvas');
+    featherCanvas.width = w;
+    featherCanvas.height = h;
+    featherCtx = featherCanvas.getContext('2d');
+
+    maskCanvas = document.createElement('canvas');
+    maskCanvas.width = w;
+    maskCanvas.height = h;
+    maskCtx = maskCanvas.getContext('2d');
+}
+
+    window.addEventListener('mousemove', (e) => {
+        trail.push({
+            x: e.clientX,
+            y: e.clientY,
+            time: Date.now()
+        });
+    });
+
+    window.addEventListener('resize', handleResize);
+
+    function animate() {
+        const w = bgCanvas.width;
+        const h = bgCanvas.height;
+        const now = Date.now();
+
+        trail = trail.filter(p => now - p.time < trailLifetime);
+
+        if (asciiBufferCanvas) {
+            bgCtx.drawImage(asciiBufferCanvas, 0, 0);
+
+            if (trail.length > 0 && featherCtx && maskCtx && sourceCanvas) {
+                featherCtx.clearRect(0, 0, w, h);
+                maskCtx.clearRect(0, 0, w, h);
+
+                for (let i = 0; i < trail.length; i++) {
+                    const pt = trail[i];
+                    const age = now - pt.time;
+                    const opacity = Math.max(0, 1 - age / trailLifetime);
+                    const currentRadius = strokeRadius * opacity;
+
+                    if (currentRadius <= 0) continue;
+
+                    let steps = 1;
+                    let prev = null;
+                    if (i > 0) {
+                        prev = trail[i - 1];
+                        const dist = Math.hypot(pt.x - prev.x, pt.y - prev.y);
+                        steps = Math.max(1, Math.floor(dist / (strokeRadius * 0.2)));
+                    }
+
+                    for (let s = 0; s <= steps; s++) {
+                        const t = steps === 0 ? 0 : s / steps;
+                        const cx = prev ? prev.x + (pt.x - prev.x) * t : pt.x;
+                        const cy = prev ? prev.y + (pt.y - prev.y) * t : pt.y;
+
+                        const grad = maskCtx.createRadialGradient(cx, cy, 0, cx, cy, currentRadius);
+                        grad.addColorStop(0, `rgba(0, 0, 0, ${opacity * 0.4})`);
+                        grad.addColorStop(0.4, `rgba(0, 0, 0, ${opacity * 0.2})`);
+                        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                        maskCtx.fillStyle = grad;
+                        maskCtx.beginPath();
+                        maskCtx.arc(cx, cy, currentRadius, 0, Math.PI * 2);
+                        maskCtx.fill();
+                    }
+                }
+
+                featherCtx.drawImage(sourceCanvas, 0, 0);
+                featherCtx.globalCompositeOperation = 'destination-in';
+                featherCtx.drawImage(maskCanvas, 0, 0);
+                featherCtx.globalCompositeOperation = 'source-over';
+
+                bgCtx.drawImage(featherCanvas, 0, 0);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('load', () => {
+        // Preload image dynamically using defaultImagePath as backup
+        loadedImageObj = new Image();
+        loadedImageObj.onload = () => {
+            handleResize();
+        };
+        loadedImageObj.src = defaultImagePath;
+
+        handleResize();
+        animate();
+    });
+</script>
+</body>
+</html>
