@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Appointments - Aurelia Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/appointments.css}">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="brand">🌸 Aurelia Salon</div>
+    <a th:href="@{/customer/dashboard}" class="nav-link">Overview</a>
+    <a th:href="@{/customer/appointments}" class="nav-link active">Appointments</a>
+    <a th:href="@{/customer/appointments/book}" class="nav-link">Book Appointment</a>
+</div>
+
+<div class="main-content">
+    <div class="glass-card">
+
+        <div class="card-head">
+            <div>
+                <h2 class="page-title">Your Appointments History</h2>
+                <p class="page-sub">Every treatment you've booked with us</p>
+            </div>
+            <div class="ledger">
+                <span class="ledger-label">Total spent</span>
+                <span class="ledger-value" id="totalSpent">LKR 0.00</span>
+                <span class="ledger-meta" id="totalMeta">&nbsp;</span>
+            </div>
+        </div>
+
+        <table class="styled-table" th:unless="${#lists.isEmpty(appointments)}">
+            <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Treatment</th>
+                <th>Date &amp; time</th>
+                <th class="num">Price</th>
+                <th class="mid">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="app : ${appointments}">
+                <td class="cell-id" data-label="Reference" th:text="${'#APP-' + app.id}">#APP-1</td>
+                <td class="cell-service" data-label="Treatment" th:text="${app.serviceName}">Signature Facial</td>
+                <td class="cell-when" data-label="Date &amp; time"
+                    th:text="${#temporals.format(app.appointmentDateTime, 'yyyy-MM-dd HH:mm')}">2026-09-20 10:00</td>
+                <td class="cell-price" data-label="Price"
+                    th:text="${'LKR ' + app.calculateFinalPrice()}">LKR 8500.0</td>
+                <td class="cell-status" data-label="Status">
+                    <span class="badge"
+                          th:classappend="${'badge-' + #strings.toLowerCase(app.status)}"
+                          th:text="${app.status}">PENDING</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(appointments)}">
+            <span class="mark">🌸</span>
+            <p>No treatments booked yet.</p>
+            <a th:href="@{/customer/appointments/book}">Book your first appointment</a>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/appointments-table.js}"></script>
+
+</body>
+</html>
