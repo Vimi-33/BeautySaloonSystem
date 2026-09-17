@@ -21,4 +21,6 @@ public interface UserService {
     void deleteUser(Long userId);
 
     void updateCustomerTier(Long customerId, String newTier);
+
+    void applyAppointmentRewards(Long customerId, Double price);
 }
