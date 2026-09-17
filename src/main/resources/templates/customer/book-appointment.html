@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book Appointment - Aurelia Salon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/appointments.css}">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="brand">🌸 Aurelia Salon</div>
+    <a th:href="@{/customer/dashboard}" class="nav-link">Overview</a>
+    <a th:href="@{/customer/appointments}" class="nav-link">Appointments</a>
+    <a th:href="@{/customer/appointments/book}" class="nav-link active">Book Appointment</a>
+</div>
+
+<div class="main-content">
+    <div class="glass-card" style="max-width: 600px; margin: 0 auto;">
+        <h2 class="page-title">Reserve Your Treatment</h2>
+
+        <form th:action="@{/customer/appointments/book}" th:object="${appointmentForm}" method="post">
+            <div class="form-group">
+                <label>Select Treatment</label>
+                <select id="serviceSelect" class="form-control" th:field="*{serviceName}" onchange="updateCalculatedPrice()" required>
+                    <option value="" data-price="0" disabled selected>-- Select a Treatment --</option>
+                    <option value="Signature Facial" data-price="8500">Signature Facial - LKR 8,500</option>
+                    <option value="Hair Styling & Cut" data-price="6000">Hair Styling & Cut - LKR 6,000</option>
+                    <option value="Luxury Pedicure" data-price="5000">Luxury Pedicure - LKR 5,000</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Booking Tier</label>
+                <select id="tierSelect" class="form-control" th:field="*{appointmentType}" onchange="updateCalculatedPrice()">
+                    <option value="STANDARD">Standard Service</option>
+                    <option value="VIP">VIP Tier (Dedicated Senior Stylist + 15% Surcharge)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Date & Time</label>
+                <input type="datetime-local" class="form-control" th:field="*{appointmentDateTime}" required />
+            </div>
+
+            <div class="form-group">
+                <label>Estimated Base Price (LKR)</label>
+                <input type="number" step="0.01" id="priceInput" class="form-control" th:field="*{price}" placeholder="0.00" readonly required />
+            </div>
+
+            <div class="form-group">
+                <label>Special Requests / Notes</label>
+                <textarea class="form-control" th:field="*{notes}" rows="3" placeholder="Tell us about allergies or specific preferences..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary">Confirm Booking</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateCalculatedPrice() {
+        const serviceSelect = document.getElementById('serviceSelect');
+        const tierSelect = document.getElementById('tierSelect');
+        const priceInput = document.getElementById('priceInput');
+
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        let basePrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+
+        // Apply 15% surcharge if VIP tier is chosen
+        if (tierSelect.value === 'VIP') {
+            basePrice = basePrice * 1.15;
+        }
+
+        priceInput.value = basePrice > 0 ? basePrice.toFixed(2) : '';
+    }
+
+    // Initial check on load
+    document.addEventListener('DOMContentLoaded', updateCalculatedPrice);
+</script>
+<script th:src="@{/booking-animation.js}"></script>
+</body>
+</html>

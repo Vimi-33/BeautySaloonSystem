@@ -1,0 +1,1016 @@
+/* ==========================================================================
+   Aurelia Salon — booking page
+   Drop-in replacement for /css/appointments.css
+   Class names match the existing Thymeleaf markup.
+   ========================================================================== */
+
+:root {
+  --ink:        #FBF7F4;
+  --ink-soft:   rgba(251, 247, 244, .64);
+  --ink-mute:   rgba(251, 247, 244, .36);
+
+  --ground-1:   #241522;
+  --ground-2:   #160C15;
+  --bloom-rose: rgba(232, 180, 184, .28);
+  --bloom-plum: rgba(126, 63, 106, .44);
+
+  --glass:      rgba(255, 255, 255, .055);
+  --glass-lift: rgba(255, 255, 255, .085);
+  --edge:       rgba(255, 255, 255, .12);
+  --edge-soft:  rgba(255, 255, 255, .07);
+  --field:      rgba(255, 255, 255, .04);
+
+  --rose:       #E8B4B8;
+  --rose-deep:  #C98A94;
+  --gold:       #E0BC7A;
+  --gold-deep:  #B98E43;
+
+  --ease-silk:  cubic-bezier(.16, 1, .3, 1);
+}
+
+:root:not([data-theme="dark"]) {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ink:        #34202F;
+    --ink-soft:   rgba(52, 32, 47, .66);
+    --ink-mute:   rgba(52, 32, 47, .42);
+    --ground-1:   #F9F1F1;
+    --ground-2:   #F0E3E6;
+    --bloom-rose: rgba(232, 180, 184, .55);
+    --bloom-plum: rgba(160, 110, 145, .22);
+    --glass:      rgba(255, 255, 255, .58);
+    --glass-lift: rgba(255, 255, 255, .78);
+    --edge:       rgba(52, 32, 47, .10);
+    --edge-soft:  rgba(52, 32, 47, .06);
+    --field:      rgba(255, 255, 255, .62);
+    --rose-deep:  #A9606C;
+    --gold:       #A8792C;
+    --gold-deep:  #8C6220;
+  }
+}
+
+:root[data-theme="light"] {
+  --ink:        #34202F;
+  --ink-soft:   rgba(52, 32, 47, .66);
+  --ink-mute:   rgba(52, 32, 47, .42);
+  --ground-1:   #F9F1F1;
+  --ground-2:   #F0E3E6;
+  --bloom-rose: rgba(232, 180, 184, .55);
+  --bloom-plum: rgba(160, 110, 145, .22);
+  --glass:      rgba(255, 255, 255, .58);
+  --glass-lift: rgba(255, 255, 255, .78);
+  --edge:       rgba(52, 32, 47, .10);
+  --edge-soft:  rgba(52, 32, 47, .06);
+  --field:      rgba(255, 255, 255, .62);
+  --rose-deep:  #A9606C;
+  --gold:       #A8792C;
+  --gold-deep:  #8C6220;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground-2);
+  color: var(--ink);
+  font-family: "Jost", "Segoe UI", system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: .012em;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Ambient ground: two slow blooms of light drifting behind the glass.
+   Long cycles (38s / 52s), never in sync, so it reads as light on silk
+   rather than as an animation.
+   -------------------------------------------------------------------------- */
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: -2;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+body::before {
+  width: 64vmax; height: 64vmax;
+  top: -22vmax; left: -18vmax;
+  background: radial-gradient(circle at 50% 50%, var(--bloom-rose), transparent 68%);
+  animation: driftA 38s var(--ease-silk) infinite alternate;
+}
+
+body::after {
+  width: 72vmax; height: 72vmax;
+  bottom: -30vmax; right: -24vmax;
+  background: radial-gradient(circle at 50% 50%, var(--bloom-plum), transparent 70%);
+  animation: driftB 52s var(--ease-silk) infinite alternate;
+}
+
+@keyframes driftA {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(12vw, 8vh, 0) scale(1.18); }
+}
+@keyframes driftB {
+  from { transform: translate3d(0, 0, 0) scale(1.1); }
+  to   { transform: translate3d(-14vw, -9vh, 0) scale(.92); }
+}
+
+/* a fixed wash so the blooms sit under a consistent ground tone */
+body { background-image: linear-gradient(165deg, var(--ground-1), var(--ground-2) 62%); }
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 264px;
+  padding: 44px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: linear-gradient(180deg, var(--glass), transparent 70%);
+  border-right: 1px solid var(--edge-soft);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 5;
+}
+
+.brand {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 40px;
+  letter-spacing: .01em;
+  animation: brandSettle 1.4s var(--ease-silk) both;
+}
+
+@keyframes brandSettle {
+  from { opacity: 0; letter-spacing: .22em; filter: blur(4px); }
+  to   { opacity: 1; letter-spacing: .01em; filter: blur(0); }
+}
+
+.nav-link {
+  position: relative;
+  display: block;
+  padding: 11px 14px 11px 18px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 15px;
+  border-radius: 10px;
+  transition: color .4s var(--ease-silk), background-color .4s var(--ease-silk),
+              padding-left .4s var(--ease-silk);
+  animation: navIn .8s var(--ease-silk) both;
+}
+
+.nav-link:nth-of-type(1) { animation-delay: .18s; }
+.nav-link:nth-of-type(2) { animation-delay: .26s; }
+.nav-link:nth-of-type(3) { animation-delay: .34s; }
+
+@keyframes navIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* the rose stem: grows from the centre outward on hover, holds for active */
+.nav-link::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 50%;
+  width: 2px; height: 22px;
+  margin-top: -11px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--rose), var(--rose-deep));
+  transform: scaleY(0);
+  transition: transform .5s var(--ease-silk);
+}
+
+.nav-link:hover { color: var(--ink); background: var(--glass); padding-left: 22px; }
+.nav-link:hover::before { transform: scaleY(1); }
+
+.nav-link.active {
+  color: var(--ink);
+  background: var(--glass-lift);
+  padding-left: 22px;
+}
+.nav-link.active::before { transform: scaleY(1); }
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Main content + glass card
+   -------------------------------------------------------------------------- */
+
+.main-content {
+  margin-left: 264px;
+  padding: 72px 40px 96px;
+  min-height: 100vh;
+}
+
+.glass-card {
+  position: relative;
+  padding: 44px 46px 40px;
+  border-radius: 22px;
+  background: var(--glass);
+  border: 1px solid var(--edge);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: 0 30px 70px -40px rgba(12, 4, 12, .85);
+  animation: cardRise 1.1s var(--ease-silk) both;
+  transition: border-color .8s var(--ease-silk), box-shadow .8s var(--ease-silk);
+}
+
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(22px) scale(.985); filter: blur(7px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* a single sheen crosses the card once, as it settles */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(105deg,
+    transparent 44%,
+    rgba(255, 255, 255, .13) 50%,
+    transparent 56%);
+  background-size: 300% 100%;
+  background-position: 150% 0;
+  animation: sheen 1.9s var(--ease-silk) .5s 1 both;
+}
+
+@keyframes sheen {
+  from { background-position: -150% 0; }
+  to   { background-position: 150% 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Title
+   -------------------------------------------------------------------------- */
+
+.page-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(30px, 4.4vw, 42px);
+  font-weight: 300;
+  line-height: 1.12;
+  margin: 0 0 6px;
+  color: var(--ink);
+  animation: titleIn 1.2s var(--ease-silk) .18s both;
+}
+
+@keyframes titleIn {
+  from { opacity: 0; transform: translateY(12px); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* hairline rule + bud, drawn left to right after the title lands */
+.page-title + form::before,
+.title-rule {
+  content: "";
+  display: block;
+  height: 1px;
+  margin: 0 0 30px;
+  background: linear-gradient(90deg, var(--gold), var(--rose-deep) 55%, transparent);
+  transform-origin: left;
+  animation: ruleDraw 1.3s var(--ease-silk) .55s both;
+}
+
+@keyframes ruleDraw {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Form
+   -------------------------------------------------------------------------- */
+
+form { position: relative; }
+
+.form-group {
+  margin-bottom: 22px;
+  animation: fieldIn .9s var(--ease-silk) both;
+}
+
+.form-group:nth-of-type(1) { animation-delay: .46s; }
+.form-group:nth-of-type(2) { animation-delay: .54s; }
+.form-group:nth-of-type(3) { animation-delay: .62s; }
+.form-group:nth-of-type(4) { animation-delay: .70s; }
+.form-group:nth-of-type(5) { animation-delay: .78s; }
+
+@keyframes fieldIn {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.form-group label {
+  display: block;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+  transition: color .45s var(--ease-silk), transform .45s var(--ease-silk);
+}
+
+.form-group:focus-within label {
+  color: var(--rose);
+  transform: translateX(3px);
+}
+
+.form-control {
+  width: 100%;
+  padding: 13px 15px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--edge);
+  border-radius: 11px;
+  outline: none;
+  transition: border-color .45s var(--ease-silk),
+              background-color .45s var(--ease-silk),
+              box-shadow .55s var(--ease-silk);
+}
+
+.form-control::placeholder { color: var(--ink-mute); }
+
+.form-control:hover { border-color: rgba(232, 180, 184, .38); }
+
+/* focus blooms a soft rose halo once, then rests on a quiet ring */
+.form-control:focus {
+  border-color: var(--rose);
+  background: var(--glass-lift);
+  box-shadow: 0 0 0 3px rgba(232, 180, 184, .16);
+  animation: focusBloom .75s var(--ease-silk);
+}
+
+@keyframes focusBloom {
+  0%   { box-shadow: 0 0 0 0 rgba(232, 180, 184, .34); }
+  100% { box-shadow: 0 0 0 3px rgba(232, 180, 184, .16); }
+}
+
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 22px) calc(50% + 1px), calc(100% - 16px) calc(50% + 1px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+select.form-control option { background: var(--ground-1); color: var(--ink); }
+
+textarea.form-control { resize: vertical; min-height: 84px; line-height: 1.6; }
+
+input[type="datetime-local"].form-control { cursor: pointer; }
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(.75) sepia(.5) saturate(3) hue-rotate(300deg);
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity .3s;
+}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+/* --------------------------------------------------------------------------
+   Price — the one place the page raises its voice.
+   The real <input> stays untouched for Thymeleaf binding; a ghost layer
+   renders the formatted figure and rolls each changed digit.
+   -------------------------------------------------------------------------- */
+
+.price-shell {
+  position: relative;
+  border-radius: 11px;
+  overflow: hidden;
+  transition: box-shadow .6s var(--ease-silk);
+}
+
+.price-shell .form-control {
+  color: transparent;
+  caret-color: transparent;
+  cursor: default;
+}
+
+.price-shell input[readonly].form-control:hover { border-color: var(--edge); }
+
+/* hide number spinners */
+.price-shell input::-webkit-outer-spin-button,
+.price-shell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.price-shell input[type="number"] { -moz-appearance: textfield; }
+
+.price-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 15px;
+  pointer-events: none;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+
+.price-ghost .unit {
+  font-family: "Jost", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .18em;
+  color: var(--ink-mute);
+  transform: translateY(1px);
+}
+
+.price-ghost .digits { display: flex; }
+
+.price-ghost .d {
+  display: inline-block;
+  min-width: .06em;
+  will-change: transform, opacity;
+}
+
+.price-ghost .d.roll { animation: digitRoll .5s var(--ease-silk) both; }
+
+@keyframes digitRoll {
+  0%   { opacity: 0; transform: translateY(-.55em); filter: blur(2px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.price-ghost .was {
+  font-size: 15px;
+  color: var(--ink-mute);
+  text-decoration: line-through;
+  text-decoration-color: var(--rose-deep);
+  animation: wasIn .5s var(--ease-silk) both;
+}
+
+@keyframes wasIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: .9; transform: translateX(0); }
+}
+
+.price-ghost .empty { color: var(--ink-mute); font-size: 15px; font-family: "Jost", sans-serif; }
+
+/* a warm light travels across the field whenever the figure changes */
+.price-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg,
+    transparent 40%,
+    rgba(224, 188, 122, .22) 50%,
+    transparent 60%);
+  transform: translateX(-130%);
+  opacity: 0;
+}
+
+.price-shell.is-updating::after { animation: priceSweep .95s var(--ease-silk); }
+
+@keyframes priceSweep {
+  0%   { opacity: 1; transform: translateX(-130%); }
+  100% { opacity: 1; transform: translateX(130%); }
+}
+
+/* --------------------------------------------------------------------------
+   VIP tier: the card and the price warm to champagne
+   -------------------------------------------------------------------------- */
+
+.tier-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 2px 9px 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(224, 188, 122, .45);
+  background: rgba(224, 188, 122, .12);
+  color: var(--gold);
+  font-family: "Jost", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  animation: chipIn .6s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(.6) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.is-vip .glass-card {
+  border-color: rgba(224, 188, 122, .38);
+  box-shadow: 0 30px 70px -40px rgba(12, 4, 12, .85),
+              0 0 0 1px rgba(224, 188, 122, .10),
+              0 0 60px -30px rgba(224, 188, 122, .45);
+}
+
+.is-vip .price-shell { box-shadow: 0 0 0 1px rgba(224, 188, 122, .30); }
+.is-vip .price-ghost .digits { color: var(--gold); }
+
+/* --------------------------------------------------------------------------
+   Button
+   -------------------------------------------------------------------------- */
+
+.btn-primary {
+  position: relative;
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: #241522;
+  background: linear-gradient(120deg, var(--rose), #F3D3D0 45%, var(--gold) 130%);
+  background-size: 180% 100%;
+  background-position: 0% 50%;
+  transition: background-position .9s var(--ease-silk),
+              transform .35s var(--ease-silk),
+              box-shadow .5s var(--ease-silk);
+  box-shadow: 0 10px 24px -14px rgba(232, 180, 184, .9);
+  animation: fieldIn .9s var(--ease-silk) .86s both;
+}
+
+.btn-primary:hover {
+  background-position: 100% 50%;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -14px rgba(224, 188, 122, .75);
+}
+
+.btn-primary:active { transform: translateY(0) scale(.994); }
+
+.btn-primary:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.btn-primary .label { position: relative; z-index: 2; transition: opacity .3s; }
+
+/* confirming: a warm fill closes over the button, then petals open */
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, var(--gold), #F6E2BE);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.btn-primary.is-booking { pointer-events: none; }
+.btn-primary.is-booking::before { animation: fillIn .7s var(--ease-silk) both; }
+
+@keyframes fillIn {
+  to { transform: scaleX(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Petals (submit confirmation)
+   -------------------------------------------------------------------------- */
+
+.petal {
+  position: fixed;
+  z-index: 60;
+  width: 11px;
+  height: 11px;
+  border-radius: 74% 0 74% 0;
+  background: linear-gradient(140deg, var(--rose), #FFF1F2);
+  pointer-events: none;
+  opacity: 0;
+  animation: petalOpen 1.25s cubic-bezier(.2, .7, .3, 1) both;
+}
+
+@keyframes petalOpen {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.3); }
+  18%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 880px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--edge-soft);
+  }
+  .brand { font-size: 21px; margin: 0 14px 0 0; white-space: nowrap; }
+  .nav-link { padding: 8px 12px; white-space: nowrap; font-size: 14px; }
+  .nav-link:hover, .nav-link.active { padding-left: 16px; }
+  .nav-link::before { left: 2px; height: 16px; margin-top: -8px; }
+  .main-content { margin-left: 0; padding: 34px 18px 64px; }
+  .glass-card { padding: 30px 22px 28px; border-radius: 18px; }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  body::before, body::after { animation: none; }
+  .petal { display: none; }
+}
+
+/* ==========================================================================
+   Silk ground — a scalloped wallpaper motif under the glass, masked so it
+   fades away behind the content and only shows at the edges of the screen.
+   Pure CSS, no image files to serve.
+   ========================================================================== */
+
+:root { --pattern-opacity: .30; --vignette: rgba(9, 3, 9, .62); }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) { --pattern-opacity: .34; --vignette: rgba(120, 70, 100, .16); }
+}
+:root[data-theme="light"] { --pattern-opacity: .34; --vignette: rgba(120, 70, 100, .16); }
+
+html::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='92' height='92' viewBox='0 0 92 92'%3E%3Cg fill='none' stroke='%23E8B4B8' stroke-width='1' stroke-linecap='round'%3E%3Cpath d='M-92 46a46 46 0 0 1 92 0'/%3E%3Cpath d='M-80 46a34 34 0 0 1 68 0'/%3E%3Cpath d='M-68 46a22 22 0 0 1 44 0'/%3E%3Cpath d='M-57 46a11 11 0 0 1 22 0'/%3E%3Cpath d='M0 46a46 46 0 0 1 92 0'/%3E%3Cpath d='M12 46a34 34 0 0 1 68 0'/%3E%3Cpath d='M24 46a22 22 0 0 1 44 0'/%3E%3Cpath d='M35 46a11 11 0 0 1 22 0'/%3E%3Cpath d='M92 46a46 46 0 0 1 92 0'/%3E%3Cpath d='M104 46a34 34 0 0 1 68 0'/%3E%3Cpath d='M116 46a22 22 0 0 1 44 0'/%3E%3Cpath d='M127 46a11 11 0 0 1 22 0'/%3E%3Cpath d='M-46 92a46 46 0 0 1 92 0'/%3E%3Cpath d='M-34 92a34 34 0 0 1 68 0'/%3E%3Cpath d='M-22 92a22 22 0 0 1 44 0'/%3E%3Cpath d='M-11 92a11 11 0 0 1 22 0'/%3E%3Cpath d='M46 92a46 46 0 0 1 92 0'/%3E%3Cpath d='M58 92a34 34 0 0 1 68 0'/%3E%3Cpath d='M70 92a22 22 0 0 1 44 0'/%3E%3Cpath d='M81 92a11 11 0 0 1 22 0'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 190px 190px;
+  opacity: var(--pattern-opacity);
+  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 52% 46%, transparent 12%, #000 88%);
+          mask-image: radial-gradient(ellipse 62% 58% at 52% 46%, transparent 12%, #000 88%);
+  animation: silkDrift 70s linear infinite;
+}
+
+@keyframes silkDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-190px, 190px, 0); }
+}
+
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% -10%, transparent 42%, var(--vignette) 100%);
+}
+
+/* ==========================================================================
+   Card head + ledger
+   ========================================================================== */
+
+.glass-card { max-width: 1080px; margin-inline: auto; }
+
+.card-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+  margin-bottom: 26px;
+  position: relative;
+}
+
+.card-head::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), var(--rose-deep) 40%, transparent 92%);
+  transform-origin: left;
+  animation: ruleDraw 1.3s var(--ease-silk) .5s both;
+}
+
+.card-head .page-title { margin-bottom: 4px; }
+
+.page-sub {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-mute);
+  letter-spacing: .03em;
+  animation: fieldIn .9s var(--ease-silk) .34s both;
+}
+
+.ledger {
+  text-align: right;
+  line-height: 1.25;
+  animation: ledgerIn 1.1s var(--ease-silk) .42s both;
+}
+
+@keyframes ledgerIn {
+  from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.ledger-label {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  color: var(--ink-mute);
+  margin-bottom: 2px;
+}
+
+.ledger-value {
+  display: block;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-value .cur {
+  font-family: "Jost", sans-serif;
+  font-size: 11px;
+  letter-spacing: .18em;
+  color: var(--ink-mute);
+  margin-right: 7px;
+  vertical-align: 6px;
+}
+
+.ledger-meta {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: .04em;
+  margin-top: 3px;
+}
+
+/* ==========================================================================
+   Table
+   ========================================================================== */
+
+.styled-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14.5px;
+  font-weight: 300;
+}
+
+.styled-table thead th {
+  padding: 0 16px 13px;
+  text-align: left;
+  font-weight: 400;
+  font-size: 11.5px;
+  letter-spacing: .13em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+  animation: fieldIn .8s var(--ease-silk) .5s both;
+}
+
+.styled-table thead th.num  { text-align: right; }
+.styled-table thead th.mid  { text-align: center; }
+
+.styled-table tbody td {
+  padding: 15px 16px;
+  border-top: 1px solid var(--edge-soft);
+  vertical-align: middle;
+  transition: background-color .4s var(--ease-silk);
+}
+
+.styled-table tbody tr {
+  animation: rowIn .75s var(--ease-silk) both;
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.styled-table tbody tr:nth-child(1)  { animation-delay: .58s; }
+.styled-table tbody tr:nth-child(2)  { animation-delay: .65s; }
+.styled-table tbody tr:nth-child(3)  { animation-delay: .72s; }
+.styled-table tbody tr:nth-child(4)  { animation-delay: .79s; }
+.styled-table tbody tr:nth-child(5)  { animation-delay: .86s; }
+.styled-table tbody tr:nth-child(6)  { animation-delay: .93s; }
+.styled-table tbody tr:nth-child(7)  { animation-delay: 1.00s; }
+.styled-table tbody tr:nth-child(8)  { animation-delay: 1.07s; }
+.styled-table tbody tr:nth-child(n+9){ animation-delay: 1.14s; }
+
+.styled-table tbody tr:hover td { background: var(--glass); }
+.styled-table tbody tr:hover td:first-child { border-radius: 10px 0 0 10px; }
+.styled-table tbody tr:hover td:last-child  { border-radius: 0 10px 10px 0; }
+
+/* the rose stem again, as the row marker — same language as the nav */
+.styled-table tbody td:first-child { position: relative; }
+
+.styled-table tbody td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 3px; top: 50%;
+  width: 2px; height: 20px;
+  margin-top: -10px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--rose), var(--rose-deep));
+  transform: scaleY(0);
+  transition: transform .45s var(--ease-silk);
+}
+
+.styled-table tbody tr:hover td:first-child::before { transform: scaleY(1); }
+
+.cell-id {
+  color: var(--ink-mute);
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.cell-service {
+  font-size: 15.5px;
+  color: var(--ink);
+}
+
+.cell-when { color: var(--ink-soft); white-space: nowrap; }
+
+.cell-when .clock {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-mute);
+}
+
+.cell-price {
+  text-align: right;
+  white-space: nowrap;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 20px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-price .cur {
+  font-family: "Jost", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: .16em;
+  color: var(--ink-mute);
+  margin-right: 6px;
+  vertical-align: 3px;
+}
+
+.cell-status { text-align: center; }
+
+/* ==========================================================================
+   Status badges
+   ========================================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 13px 5px 11px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 11.5px;
+  letter-spacing: .1em;
+  white-space: nowrap;
+  color: var(--ink-mute);
+  transition: box-shadow .4s var(--ease-silk);
+}
+
+.badge::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.badge-pending { color: var(--gold); background: rgba(224, 188, 122, .10); }
+.badge-pending::before { animation: breathe 2.6s ease-in-out infinite; }
+
+@keyframes breathe {
+  0%, 100% { opacity: 1;  transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.7); }
+}
+
+.badge-confirmed,
+.badge-accepted { color: #9FD3BB; background: rgba(159, 211, 187, .10); }
+
+.badge-cancelled { color: var(--rose-deep); background: rgba(201, 138, 148, .10); }
+
+.badge-completed { color: var(--rose); background: rgba(232, 180, 184, .10); }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .badge-confirmed,
+  :root:not([data-theme="dark"]) .badge-accepted { color: #3E7F65; }
+}
+
+.styled-table tbody tr:hover .badge { box-shadow: 0 0 0 3px rgba(255, 255, 255, .05); }
+
+/* ==========================================================================
+   Empty state
+   ========================================================================== */
+
+.empty-state {
+  padding: 54px 20px 44px;
+  text-align: center;
+  animation: fieldIn .9s var(--ease-silk) .5s both;
+}
+
+.empty-state .mark {
+  display: block;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 40px;
+  color: var(--rose);
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  margin: 0 0 20px;
+  color: var(--ink-soft);
+}
+
+.empty-state a {
+  display: inline-block;
+  padding: 11px 26px;
+  border-radius: 999px;
+  border: 1px solid var(--rose);
+  color: var(--rose);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: .08em;
+  transition: background-color .45s var(--ease-silk), color .45s var(--ease-silk);
+}
+
+.empty-state a:hover { background: var(--rose); color: #241522; }
+
+/* ==========================================================================
+   Table on small screens — each row becomes its own card
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  .card-head { align-items: flex-start; }
+  .ledger { text-align: left; }
+
+  .styled-table thead { display: none; }
+
+  .styled-table tbody tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 6px 2px;
+    border: 1px solid var(--edge);
+    border-radius: 14px;
+    background: var(--glass);
+  }
+
+  .styled-table tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border-top: 0;
+    padding: 9px 15px;
+    text-align: right;
+  }
+
+  .styled-table tbody td::after {
+    content: attr(data-label);
+    order: -1;
+    font-size: 12px;
+    letter-spacing: .06em;
+    color: var(--ink-mute);
+  }
+
+  .styled-table tbody td:first-child::before { display: none; }
+  .styled-table tbody tr:hover td { background: none; }
+  .cell-when .clock { display: inline; margin-left: 6px; }
+  .cell-price { font-size: 19px; }
+}
