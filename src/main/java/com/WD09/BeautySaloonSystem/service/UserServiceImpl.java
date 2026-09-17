@@ -1,6 +1,5 @@
 package com.WD09.BeautySaloonSystem.service;
 
-
 import com.WD09.BeautySaloonSystem.entities.Customer;
 import com.WD09.BeautySaloonSystem.entities.User;
 import com.WD09.BeautySaloonSystem.repository.UserRepository;
@@ -48,8 +47,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
     }
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
@@ -113,5 +112,39 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public void applyAppointmentRewards(Long customerId, Double price) {
+        if (price == null || price <= 0) return;
+
+        User user = findById(customerId);
+
+        if (user instanceof Customer customer) {
+            // 1. Increment Total Spent
+            // 1. Increment Total Spent
+// 1. Increment Total Spent
+            double currentSpent = customer.getTotalSpent(); // Primitive double cannot be null
+            double newTotalSpent = currentSpent + price;
+            customer.setTotalSpent(newTotalSpent);
+
+// 2. Add Loyalty Points (1 point earned per $10 spent)
+            int pointsEarned = (int) (price / 10);
+            int currentPoints = customer.getLoyaltyPoints(); // Primitive int cannot be null
+            customer.setLoyaltyPoints(currentPoints + pointsEarned);
+
+// 3. Automatically upgrade Tier based on cumulative spent amount
+            if (newTotalSpent >= 500.0) {
+                customer.setMembershipTier("PLATINUM");
+            } else if (newTotalSpent >= 200.0) {
+                customer.setMembershipTier("GOLD");
+            } else {
+                customer.setMembershipTier("SILVER");
+            }
+
+            userRepository.save(customer);
+        } else {
+            throw new IllegalArgumentException("Target user is not a Customer account.");
+        }
     }
 }
