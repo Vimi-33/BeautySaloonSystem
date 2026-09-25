@@ -1,2 +1,6 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+# Exclude HTML, CSS, and JS from language statistics calculation
+*.html linguist-vendored
+*.css linguist-vendored
+*.js linguist-vendored
