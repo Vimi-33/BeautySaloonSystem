@@ -24,9 +24,18 @@
                 <label>Select Treatment</label>
                 <select id="serviceSelect" class="form-control" th:field="*{serviceName}" onchange="updateCalculatedPrice()" required>
                     <option value="" data-price="0" disabled selected>-- Select a Treatment --</option>
-                    <option value="Signature Facial" data-price="8500">Signature Facial - LKR 8,500</option>
-                    <option value="Hair Styling & Cut" data-price="6000">Hair Styling & Cut - LKR 6,000</option>
-                    <option value="Luxury Pedicure" data-price="5000">Luxury Pedicure - LKR 5,000</option>
+
+                    <!-- Services come from the admin Service Catalog -->
+                    <option th:each="service : ${services}"
+                            th:value="${service.name}"
+                            th:data-price="${service.price != null ? service.price : 0}"
+                            th:text="${service.name + ' - LKR ' + #numbers.formatDecimal(service.price != null ? service.price : 0, 1, 'COMMA', 2, 'POINT')}">
+                        Service Name - LKR 0.00
+                    </option>
+
+                    <option th:if="${services == null or #lists.isEmpty(services)}" value="" data-price="0" disabled>
+                        No treatments available right now
+                    </option>
                 </select>
             </div>
 

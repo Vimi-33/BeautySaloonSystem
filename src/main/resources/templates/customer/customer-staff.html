@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Our Specialists · Aurelia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/customer-dashboard.css}" href="/css/customer-dashboard.css">
+
+    <style>
+        /* Scoped with st- so nothing clashes with customer-dashboard.css */
+        .st-page { --pink: #ee86ab; --glass: rgba(44, 22, 31, .62); --line: rgba(255,255,255,.09); --muted: rgba(255,255,255,.62); }
+        .st-head h1 { font-family: 'Playfair Display', serif; font-size: 2.9rem; color: #fff; margin: 0 0 .4rem; }
+        .st-head p  { color: var(--muted); font-size: 1.05rem; margin: 0 0 1.75rem; }
+
+        /* Summary bar, same shape as the profile summary card */
+        .st-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;
+                      background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line);
+                      border-radius: 28px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; color: #fff; }
+        .st-summary h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin: 0 0 .25rem; }
+        .st-summary p { margin: 0; color: var(--muted); }
+        .st-stats { display: flex; gap: 2.25rem; }
+        .st-stat b { display: block; font: 600 1.7rem 'Playfair Display', serif; }
+        .st-stat span { font-size: .85rem; color: var(--muted); }
+
+        .st-toolbar { display: flex; flex-wrap: wrap; gap: .9rem; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
+        .st-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .st-chip { font: 500 .9rem 'Inter', sans-serif; color: #fff; cursor: pointer; background: rgba(255,255,255,.06);
+                   border: 1px solid var(--line); padding: .55rem 1.1rem; border-radius: 999px; transition: background .2s, border-color .2s; }
+        .st-chip:hover { background: rgba(255,255,255,.12); }
+        .st-chip[aria-pressed="true"] { background: linear-gradient(135deg, rgba(238,134,171,.35), rgba(214,95,141,.25)); border-color: var(--pink); }
+        .st-search { font: 400 .95rem 'Inter', sans-serif; color: #fff; min-width: 250px; background: rgba(255,255,255,.07);
+                     border: 1px solid var(--line); padding: .65rem 1.1rem; border-radius: 999px; }
+        .st-search::placeholder { color: var(--muted); }
+        .st-chip:focus-visible, .st-search:focus-visible, .st-contact:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+        .st-group { margin-bottom: 2.25rem; }
+        .st-group h3 { font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #fff; margin: 0 0 1rem;
+                       display: flex; align-items: baseline; gap: .75rem; }
+        .st-group h3 small { font: 400 .85rem 'Inter', sans-serif; color: var(--muted); }
+        .st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+
+        .st-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line);
+                   border-radius: 28px; padding: 1.75rem; color: #fff; transition: border-color .2s; }
+        .st-card:hover { border-color: rgba(238,134,171,.45); }
+        .st-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+        .st-avatar { flex: none; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+                     font: 600 1.4rem 'Playfair Display', serif; box-shadow: 0 8px 22px rgba(214,95,141,.3); overflow: hidden; }
+        .st-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .st-name { font: 600 1.3rem 'Playfair Display', serif; margin: 0 0 .4rem; line-height: 1.2; }
+        .st-role { display: inline-flex; align-items: center; gap: .4rem; font: 600 .78rem 'Inter', sans-serif; color: #f6b7cd;
+                   background: rgba(238,134,171,.15); border: 1px solid rgba(238,134,171,.3); padding: .25rem .7rem; border-radius: 999px; }
+        .st-role::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--pink); }
+
+        .st-contacts { display: grid; gap: .5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+        .st-contact { display: flex; align-items: center; gap: .65rem; color: rgba(255,255,255,.85); text-decoration: none;
+                      font-size: .92rem; padding: .55rem .75rem; border-radius: 14px; background: rgba(255,255,255,.05);
+                      overflow-wrap: anywhere; transition: background .2s; }
+        .st-contact:hover { background: rgba(255,255,255,.1); }
+        .st-contact svg { flex: none; width: 17px; height: 17px; color: var(--pink); }
+
+        .st-empty { display: none; text-align: center; padding: 2.5rem; color: var(--muted);
+                    background: var(--glass); border: 1px solid var(--line); border-radius: 28px; }
+        .st-src { display: none; }
+
+        @media (max-width: 960px) {
+            .main-content { margin-left: 0 !important; padding: 1.25rem !important; }
+            .st-head h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+<div class="bg-photo"></div>
+<div class="bg-tint"></div>
+
+<div class="app-shell" style="display: flex; min-height: 100vh; position: relative; z-index: 10;">
+
+    <!-- Sidebar Navigation (unchanged) -->
+    <aside class="sidebar" id="sidebar">
+        <a class="sidebar-brand" href="#">
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
+                <path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.6 8.3 2.3 4.8 5.7 4.2 8 3.8 10.2 5 12 7.4 13.8 5 16 3.8 18.3 4.2c3.4.6 5.1 4.1 3.7 7.5C19.5 16.4 12 21 12 21z"/>
+            </svg>
+            <span>Aurelia Beauty Salon</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a class="nav-link" th:href="@{/customer/dashboard}"><span>Overview</span></a>
+            <a class="nav-link" th:href="@{/customer/appointments}"><span>Appointments</span></a>
+            <a class="nav-link nav-link--active" th:href="@{/customer/staff}"><span>Staff</span></a>
+            <a class="nav-link" th:href="@{/customer/services}"><span>Services</span></a>
+            <a class="nav-link" th:href="@{/customer/profile}"><span>Profile</span></a>
+        </nav>
+
+        <form th:action="@{/logout}" method="post" class="sidebar-logout">
+            <button class="btn-ghost btn-ghost--block" type="submit"><span>Log out</span></button>
+        </form>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content st-page" style="flex: 1; margin-left: 260px; padding: 2.5rem; position: relative; z-index: 20;">
+
+        <header class="st-head">
+            <h1>Meet our team</h1>
+            <p>The specialists and stylists who look after you at Aurelia.</p>
+        </header>
+
+        <section class="st-summary">
+            <div>
+                <h2>Our specialists</h2>
+                <p>Filter by role or search for someone by name.</p>
+            </div>
+            <div class="st-stats">
+                <div class="st-stat"><b id="stCount">0</b><span>Team members</span></div>
+                <div class="st-stat"><b id="stRoles">0</b><span>Specialities</span></div>
+            </div>
+        </section>
+
+        <div class="st-toolbar">
+            <div class="st-chips" id="stChips" role="group" aria-label="Filter by role"></div>
+            <input class="st-search" id="stSearch" type="search" placeholder="Search by name" aria-label="Search team members">
+        </div>
+
+        <div id="stRoot"></div>
+        <div class="st-empty" id="stEmpty">No team members to show right now. Please check back soon.</div>
+
+        <!-- Data source: the staff table, passed in by the controller as "staffMembers" -->
+        <ul class="st-src" id="stSource">
+            <li th:each="member : ${staffMembers}"
+                th:attr="data-name=${member.fullName},
+                         data-role=${#strings.isEmpty(member.role) ? 'Specialist' : member.role},
+                         data-email=${member.email},
+                         data-phone=${member.phone},
+                         data-status=${member.status},
+                         data-photo=${member.photoUrl}"></li>
+        </ul>
+    </main>
+</div>
+
+<script>
+    (function () {
+        // Only people who are currently working are shown
+        var off = /inactive|leave|off|resign|terminat|suspend|retire/i;
+        var items = Array.prototype.map.call(document.querySelectorAll('#stSource li'), function (li) {
+            var d = li.dataset;
+            return { name: d.name, role: d.role || 'Specialist', email: d.email, phone: d.phone, status: d.status || '', photo: d.photo || '' };
+        }).filter(function (m) { return !off.test(m.status); });
+
+        var root = document.getElementById('stRoot'), chips = document.getElementById('stChips'),
+            search = document.getElementById('stSearch'), empty = document.getElementById('stEmpty');
+        var active = 'All';
+
+        var gradients = [
+            'linear-gradient(135deg,#e9789f,#c9527f)',
+            'linear-gradient(135deg,#d98bb0,#9d4f7c)',
+            'linear-gradient(135deg,#f09ab9,#b8486f)',
+            'linear-gradient(135deg,#c97ba5,#7e3f66)'
+        ];
+        var iconMail = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>';
+        var iconPhone = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>';
+
+        var initials = function (n) {
+            var p = (n || '?').trim().split(/\s+/);
+            return (p[0].charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : '')).toUpperCase();
+        };
+        var el = function (tag, cls, text) {
+            var e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (text != null) e.textContent = text;
+            return e;
+        };
+        var contact = function (href, icon, text) {
+            var a = el('a', 'st-contact'); a.href = href; a.innerHTML = icon;
+            a.appendChild(el('span', null, text));
+            return a;
+        };
+
+        // Header stats and role chips
+        var roles = ['All'];
+        items.forEach(function (m) { if (roles.indexOf(m.role) < 0) roles.push(m.role); });
+        document.getElementById('stCount').textContent = items.length;
+        document.getElementById('stRoles').textContent = roles.length - 1;
+        if (roles.length <= 2) chips.style.display = 'none';
+        roles.forEach(function (r) {
+            var b = el('button', 'st-chip', r); b.type = 'button';
+            b.addEventListener('click', function () { active = r; render(); });
+            chips.appendChild(b);
+        });
+
+        function render() {
+            var q = search.value.trim().toLowerCase();
+            var list = items.filter(function (m) {
+                return (active === 'All' || m.role === active) && (!q || m.name.toLowerCase().indexOf(q) >= 0);
+            });
+            Array.prototype.forEach.call(chips.children, function (b) {
+                b.setAttribute('aria-pressed', b.textContent === active ? 'true' : 'false');
+            });
+            root.innerHTML = '';
+            empty.style.display = list.length ? 'none' : 'block';
+            empty.textContent = items.length ? 'No one matches your search.' : 'No team members to show right now. Please check back soon.';
+
+            var groups = {};
+            list.forEach(function (m) { (groups[m.role] = groups[m.role] || []).push(m); });
+            var n = 0;
+            Object.keys(groups).forEach(function (r) {
+                var g = el('section', 'st-group');
+                var h = el('h3', null, r); h.appendChild(el('small', null, groups[r].length + (groups[r].length === 1 ? ' person' : ' people')));
+                g.appendChild(h);
+                var grid = el('div', 'st-grid');
+                groups[r].forEach(function (m) {
+                    var card = el('article', 'st-card');
+                    var top = el('div', 'st-top');
+                    var av = el('div', 'st-avatar', initials(m.name)); av.style.background = gradients[n++ % gradients.length];
+                    var who = el('div');
+                    who.appendChild(el('h4', 'st-name', m.name));
+                    who.appendChild(el('span', 'st-role', m.role));
+                    if (m.photo) {
+                        var img = new Image(); img.alt = m.name; img.src = m.photo;
+                        img.onerror = function () { img.remove(); av.textContent = initials(m.name); };
+                        av.textContent = ''; av.appendChild(img);
+                    }
+                    top.appendChild(av); top.appendChild(who); card.appendChild(top);
+                    if (m.email || m.phone) {
+                        var c = el('div', 'st-contacts');
+                        if (m.email) c.appendChild(contact('mailto:' + m.email, iconMail, m.email));
+                        if (m.phone) c.appendChild(contact('tel:' + m.phone.replace(/\s+/g, ''), iconPhone, m.phone));
+                        card.appendChild(c);
+                    }
+                    grid.appendChild(card);
+                });
+                g.appendChild(grid); root.appendChild(g);
+            });
+        }
+
+        search.addEventListener('input', render);
+        render();
+    })();
+</script>
+
+</body>
+</html>

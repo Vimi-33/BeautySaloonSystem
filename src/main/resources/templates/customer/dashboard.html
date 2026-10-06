@@ -220,7 +220,7 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <a th:href="@{/customer/book}" href="#" class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase glow-btn flex items-center gap-2">
+                <a th:href="@{/customer/appointments/book}" href="#" class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase glow-btn flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <rect x="3" y="5" width="18" height="16" rx="2" stroke-width="2"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5h18M8 3v3M16 3v3"/>
@@ -244,7 +244,6 @@
                 </p>
             </div>
 
-            <!-- BOTTOM RIGHT STAT CARDS -->
             <!-- BOTTOM RIGHT STAT CARDS -->
             <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full pointer-events-auto mt-auto pt-6" aria-label="Account Summary">
 
@@ -281,7 +280,7 @@
 
                         <p class="text-[10px] font-mono text-plum-200/60 mt-1 leading-none"
                            th:text="${customer != null && customer.membershipTier == 'PLATINUM' ? 'VIP Unlocked' : 'Next Tier at 500 Pts'}">Next Tier at 500 Pts</p>
-                        </div>
+                    </div>
                 </article>
 
                 <!-- TOTAL SPENT CARD -->

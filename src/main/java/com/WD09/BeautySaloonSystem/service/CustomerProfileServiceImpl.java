@@ -79,4 +79,9 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
         customer.setPassword(passwordEncoder.encode(form.getNewPassword()));
         customerRepository.save(customer);
     }
+    @Override
+    public Customer getProfileByEmail(String email) {
+        return customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found with email: " + email));
+    }
 }

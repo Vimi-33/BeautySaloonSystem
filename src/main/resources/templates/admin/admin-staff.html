@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management - Aurelia Beauty Salon</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}" href="/css/admin-dashboard.css">
+
+    <style>
+        :root {
+            --st-rose: #e58aa8;
+            --st-rose-soft: rgba(229, 138, 168, 0.18);
+            --st-rose-line: rgba(229, 138, 168, 0.35);
+            --st-text-soft: rgba(255, 255, 255, 0.55);
+            --st-line: rgba(255, 255, 255, 0.10);
+        }
+
+        /* Floating petals */
+        .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+        .petals span {
+            position: absolute; top: -40px; width: 14px; height: 18px;
+            background: radial-gradient(circle at 30% 30%, #f7bfd0, var(--st-rose));
+            border-radius: 80% 0 80% 0; opacity: .28; animation: petalFall linear infinite;
+        }
+        .petals span:nth-child(1) { left: 8%;  animation-duration: 18s; animation-delay: 0s; }
+        .petals span:nth-child(2) { left: 28%; animation-duration: 24s; animation-delay: 5s;  transform: scale(.7); }
+        .petals span:nth-child(3) { left: 52%; animation-duration: 20s; animation-delay: 2s; }
+        .petals span:nth-child(4) { left: 71%; animation-duration: 27s; animation-delay: 8s;  transform: scale(.8); }
+        .petals span:nth-child(5) { left: 90%; animation-duration: 22s; animation-delay: 11s; }
+        @keyframes petalFall {
+            0%   { transform: translateY(-5vh) rotate(0deg) translateX(0); }
+            50%  { transform: translateY(55vh) rotate(180deg) translateX(40px); }
+            100% { transform: translateY(110vh) rotate(360deg) translateX(-20px); }
+        }
+        .dashboard-wrapper { position: relative; z-index: 1; }
+
+        /* Summary row */
+        .staff-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .stat-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: .9rem;
+                     padding: 1.25rem 1.4rem 1.5rem; transition: transform .3s ease, box-shadow .3s ease; }
+        .stat-card::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 35%;
+                            background: linear-gradient(90deg, var(--st-rose), transparent);
+                            border-radius: 0 3px 3px 0; transition: width .6s ease; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(229, 138, 168, 0.16); }
+        .stat-card:hover::after { width: 100%; }
+        .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+                     font-size: 1.2rem; color: var(--st-rose); background: var(--st-rose-soft); border: 1px solid var(--st-rose-line); }
+        .stat-tag { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; color: rgba(255,255,255,.6); }
+        .stat-card strong { display: block; font-size: 2.2rem; color: #fff; line-height: 1.1; font-family: 'Playfair Display', serif; }
+        .stat-card .label { font-size: .85rem; color: var(--st-text-soft); }
+
+        /* Layout */
+        .staff-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1.5rem; align-items: start; }
+        @media (max-width: 1100px) { .staff-layout { grid-template-columns: 1fr; } }
+
+        /* Toolbar */
+        .roster-tools { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+        .search-box { position: relative; }
+        .search-box i { position: absolute; left: .8rem; top: 50%; transform: translateY(-50%); color: var(--st-text-soft); }
+        .search-box input { width: 220px; padding: .55rem .9rem .55rem 2.2rem; border-radius: 999px;
+                            border: 1px solid var(--st-line); background: rgba(255,255,255,.05); color: #fff;
+                            transition: all .3s ease; outline: none; }
+        .search-box input:focus { width: 260px; border-color: var(--st-rose); box-shadow: 0 0 0 3px rgba(229,138,168,.18); }
+
+        /* Table */
+        .customer-table tbody tr { transition: background .25s ease, box-shadow .25s ease; }
+        .customer-table tbody tr:hover { background: rgba(229, 138, 168, 0.07); box-shadow: inset 3px 0 0 var(--st-rose); }
+        .customer-table tbody tr.is-editing { background: rgba(229, 138, 168, 0.16); box-shadow: inset 3px 0 0 var(--st-rose); }
+        .avatar-initials { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0;
+                           font-weight: 600; font-size: .9rem; color: #fff; overflow: hidden;
+                           background: var(--st-rose-soft); border: 1px solid var(--st-rose-line); }
+        .avatar-initials img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .staff-contact { display: flex; flex-direction: column; gap: .15rem; font-size: .85rem; }
+        .staff-contact small { color: var(--st-text-soft); display: flex; align-items: center; gap: .35rem; }
+        .row-actions { display: flex; gap: .5rem; justify-content: flex-end; align-items: center; }
+        .row-actions form { margin: 0; display: inline; }
+        .no-results { display: none; text-align: center; padding: 2rem; color: var(--st-text-soft); }
+
+        /* Form panel */
+        .form-panel { padding: 1.5rem; position: sticky; top: 1.5rem; overflow: hidden; }
+        .form-panel::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+                              background: linear-gradient(90deg, transparent, var(--st-rose), transparent);
+                              background-size: 200% 100%; animation: sheen 6s linear infinite; }
+        @keyframes sheen { to { background-position: 200% 0; } }
+        .form-head { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
+        .form-head .stat-icon { width: 42px; height: 42px; font-size: 1.05rem; }
+        .form-head h3 { color: #fff; font-size: 1.15rem; margin: 0; font-family: 'Playfair Display', serif; }
+        .form-head p { margin: 0; font-size: .78rem; color: var(--st-text-soft); }
+        .staff-form { display: flex; flex-direction: column; gap: 1rem; }
+        .field label { display: block; font-size: .8rem; margin-bottom: .35rem; color: rgba(255,255,255,.75); }
+        .field .input-wrap { position: relative; }
+        .field .input-wrap i { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--st-rose); pointer-events: none; }
+        .field .input-wrap input { width: 100%; padding-left: 2.4rem; transition: box-shadow .3s ease, border-color .3s ease; }
+        .field .input-wrap input:focus { outline: none; border-color: var(--st-rose); box-shadow: 0 0 0 3px rgba(229,138,168,.2); }
+        .form-actions { display: flex; gap: .5rem; margin-top: .25rem; }
+        .form-actions .delete-btn { flex: 1; justify-content: center; }
+        .form-actions .save-tier-btn { flex: 2; padding: .7rem; justify-content: center; }
+        .form-panel.pulse { animation: formPulse .9s ease; }
+        @keyframes formPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(229,138,168,.55); }
+            100% { box-shadow: 0 0 0 22px rgba(229,138,168,0); }
+        }
+
+        /* Photo upload */
+        .photo-field { display: flex; align-items: center; gap: 1rem; }
+        .photo-preview { width: 64px; height: 64px; border-radius: 50%; flex: none; display: grid; place-items: center;
+                         overflow: hidden; font-size: 1.4rem; color: var(--st-rose);
+                         background: var(--st-rose-soft); border: 1px solid var(--st-rose-line); }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-pick { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; font-size: .85rem; color: #fff;
+                      padding: .5rem .95rem; border-radius: 999px; border: 1px solid var(--st-rose-line);
+                      background: rgba(255,255,255,.05); transition: background .2s; }
+        .photo-pick:hover, .photo-pick:focus-within { background: var(--st-rose-soft); }
+        .photo-pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+        .photo-hint { margin: .4rem 0 0; font-size: .75rem; color: var(--st-text-soft); }
+
+        /* Shimmer on primary buttons */
+        .save-tier-btn { position: relative; overflow: hidden; }
+        .save-tier-btn::after { content: ""; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+                                background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+                                transform: skewX(-20deg); transition: left .6s ease; }
+        .save-tier-btn:hover::after { left: 140%; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .petals, .form-panel::before { animation: none; display: none; }
+            * { transition: none !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="background-glow glow-one"></div>
+<div class="background-glow glow-two"></div>
+<div class="background-glow glow-three"></div>
+
+<div class="petals" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+<div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass-panel">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="bi bi-heart-fill"></i></div>
+            <div class="brand-text">
+                <h1>Aurelia</h1>
+                <span>Beauty Salon</span>
+            </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/dashboard(view='customers')}" class="side-link"><i class="bi bi-people-fill"></i><span>Customers</span></a>
+            <a th:href="@{/admin/dashboard(view='appointments')}" class="side-link"><i class="bi bi-calendar-heart"></i><span>Appointments</span></a>
+            <a th:href="@{/admin/staff}" class="side-link active"><i class="bi bi-person-badge-fill"></i><span>Staff</span></a>
+            <a th:href="@{/admin/services}" class="side-link"><i class="bi bi-scissors"></i><span>Services</span></a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="admin-mini">
+                <div class="admin-avatar"><i class="bi bi-person-fill"></i></div>
+                <div class="admin-details">
+                    <strong th:text="${admin != null ? admin.fullName : 'Admin'}">Admin</strong>
+                    <span th:text="${admin != null ? admin.department : 'Management'}">Management</span>
+                </div>
+            </div>
+
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="dashboard-main">
+
+        <header class="topbar glass-panel">
+            <div class="topbar-title">
+                <span class="eyebrow">ADMINISTRATION</span>
+                <h2>Staff Roster</h2>
+            </div>
+            <div class="status-pill"><span class="status-dot"></span>System Online</div>
+        </header>
+
+        <main class="main-content">
+
+            <div class="page-heading">
+                <div>
+                    <h2>Manage Staff</h2>
+                    <p>Create, update, and manage your salon team members.</p>
+                </div>
+            </div>
+
+            <!-- ALERTS -->
+            <div th:if="${successMessage}" class="custom-alert success-alert">
+                <div class="alert-icon"><i class="bi bi-check-lg"></i></div>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+            </div>
+
+            <div th:if="${errorMessage}" class="custom-alert error-alert">
+                <div class="alert-icon"><i class="bi bi-exclamation-lg"></i></div>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+            </div>
+
+            <!-- SUMMARY -->
+            <section class="staff-stats">
+                <div class="stat-card glass-panel">
+                    <div class="stat-top"><div class="stat-icon"><i class="bi bi-people-fill"></i></div><span class="stat-tag">Team</span></div>
+                    <div><strong th:text="${#lists.size(staffMembers)}">0</strong><span class="label">Registered staff</span></div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-top"><div class="stat-icon"><i class="bi bi-stars"></i></div><span class="stat-tag">Roles</span></div>
+                    <div><strong id="roleCount">0</strong><span class="label">Different specializations</span></div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-top"><div class="stat-icon"><i class="bi bi-search-heart"></i></div><span class="stat-tag">Showing</span></div>
+                    <div><strong id="visibleCount">0</strong><span class="label">Matching your search</span></div>
+                </div>
+            </section>
+
+            <div class="staff-layout">
+
+                <!-- TABLE -->
+                <div class="customer-section glass-panel">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon"><i class="bi bi-person-badge"></i></div>
+                            <div>
+                                <h3>Staff Roster</h3>
+                                <p>Active team members</p>
+                            </div>
+                        </div>
+                        <div class="roster-tools">
+                            <div class="search-box">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="staffSearch" placeholder="Search name, email, role..." oninput="filterStaff()">
+                            </div>
+                            <button type="button" class="save-tier-btn" style="width: auto; padding: 0.5rem 1rem;" onclick="resetStaffForm()">
+                                <i class="bi bi-plus-lg"></i> Add New
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="customer-table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Team Member</th>
+                                <th>Contact</th>
+                                <th>Role</th>
+                                <th class="actions-heading">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="staffTableBody">
+                            <tr class="staff-row" th:each="staff : ${staffMembers}" th:attr="data-row-id=${staff.id}">
+                                <td><span class="customer-id" th:text="${'#' + staff.id}">#1</span></td>
+                                <td>
+                                    <div class="customer-name">
+                                        <div class="avatar-initials" data-initials>
+                                            <img th:if="${!#strings.isEmpty(staff.photoUrl)}"
+                                                 th:src="@{${staff.photoUrl}}" th:alt="${staff.fullName}"
+                                                 onerror="this.parentElement.textContent = this.alt.charAt(0).toUpperCase()">
+                                            <i th:if="${#strings.isEmpty(staff.photoUrl)}" class="bi bi-person-fill"></i>
+                                        </div>
+                                        <strong class="staff-name" th:text="${staff.fullName}">Staff Member</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="staff-contact">
+                                        <span th:text="${staff.email}">email@domain.com</span>
+                                        <small><i class="bi bi-telephone"></i><span th:text="${staff.phone != null ? staff.phone : '-'}">Phone</span></small>
+                                    </div>
+                                </td>
+                                <td><span class="points-badge staff-role" th:text="${staff.role}">Role</span></td>
+                                <td class="actions-cell">
+                                    <div class="row-actions">
+                                        <button type="button" class="save-tier-btn edit-staff-btn" style="padding: 0.4rem 0.8rem; width: auto;"
+                                                th:data-id="${staff.id}"
+                                                th:data-fullname="${staff.fullName}"
+                                                th:data-email="${staff.email}"
+                                                th:data-phone="${staff.phone}"
+                                                th:data-role="${staff.role}"
+                                                th:data-photo="${!#strings.isEmpty(staff.photoUrl)} ? @{${staff.photoUrl}} : _"
+                                                onclick="handleEditClick(this)">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                        <form th:action="@{/admin/staff/delete/{id}(id=${staff.id})}" method="post" onsubmit="return confirm('Delete this staff member?');">
+                                            <button type="submit" class="delete-btn"><i class="bi bi-trash3"></i> Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(staffMembers)}">
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <div class="empty-icon"><i class="bi bi-person-badge"></i></div>
+                                        <h4>No Staff Members Found</h4>
+                                        <p>Add staff members to display them in your roster.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="no-results" id="noResults"><i class="bi bi-emoji-neutral"></i> No team members match your search.</div>
+                    </div>
+                </div>
+
+                <!-- FORM -->
+                <aside class="form-panel glass-panel" id="formPanel">
+                    <div class="form-head">
+                        <div class="stat-icon"><i class="bi bi-person-plus-fill" id="formIcon"></i></div>
+                        <div>
+                            <h3 id="staffFormTitle">Add New Staff Member</h3>
+                            <p id="staffFormHint">Fill in the details below</p>
+                        </div>
+                    </div>
+
+                    <form id="staffForm" class="staff-form" th:action="@{/admin/staff/add}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" id="staffId" name="id">
+
+                        <div class="field">
+                            <label for="staffPhoto">Profile Photo</label>
+                            <div class="photo-field">
+                                <div class="photo-preview" id="photoPreview"><i class="bi bi-camera"></i></div>
+                                <div>
+                                    <label class="photo-pick" for="staffPhoto">
+                                        <i class="bi bi-upload"></i> Choose photo
+                                        <input type="file" id="staffPhoto" name="photo" accept="image/png,image/jpeg,image/webp">
+                                    </label>
+                                    <p class="photo-hint">JPG, PNG or WebP, up to 2 MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="staffFullName">Full Name</label>
+                            <div class="input-wrap"><i class="bi bi-person"></i>
+                                <input type="text" id="staffFullName" name="fullName" class="tier-select" required></div>
+                        </div>
+
+                        <div class="field">
+                            <label for="staffEmail">Email Address</label>
+                            <div class="input-wrap"><i class="bi bi-envelope"></i>
+                                <input type="email" id="staffEmail" name="email" class="tier-select" required></div>
+                        </div>
+
+                        <div class="field">
+                            <label for="staffPhone">Phone Number</label>
+                            <div class="input-wrap"><i class="bi bi-telephone"></i>
+                                <input type="text" id="staffPhone" name="phone" class="tier-select"></div>
+                        </div>
+
+                        <div class="field">
+                            <label for="staffRole">Role / Specialization</label>
+                            <div class="input-wrap"><i class="bi bi-scissors"></i>
+                                <input type="text" id="staffRole" name="role" class="tier-select" required></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="cancelStaffBtn" class="delete-btn" style="display:none;" onclick="resetStaffForm()">Cancel</button>
+                            <button type="submit" id="saveStaffBtn" class="save-tier-btn">Save Member</button>
+                        </div>
+                    </form>
+                </aside>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('staffForm');
+    const MAX_PHOTO = 2 * 1024 * 1024;
+
+    /* Multipart forms: send the CSRF token in the URL as well as the hidden field */
+    function setFormAction(path) {
+        const t = form.querySelector('input[name="_csrf"]');
+        form.action = path + (t ? '?_csrf=' + encodeURIComponent(t.value) : '');
+    }
+    setFormAction('/admin/staff/add');
+
+    /* Initials fallback + counters */
+    function updateCounts() {
+        const rows = [...document.querySelectorAll('.staff-row')];
+        const roles = new Set(rows.map(r => r.querySelector('.staff-role').textContent.trim().toLowerCase()).filter(Boolean));
+        document.getElementById('roleCount').textContent = roles.size;
+        document.getElementById('visibleCount').textContent = rows.filter(r => r.style.display !== 'none').length;
+    }
+
+    document.querySelectorAll('.staff-row').forEach(row => {
+        const holder = row.querySelector('[data-initials]');
+        const name = row.querySelector('.staff-name').textContent.trim();
+        if (name && !holder.querySelector('img')) holder.textContent = name[0].toUpperCase();
+    });
+    updateCounts();
+
+    /* Search */
+    function filterStaff() {
+        const q = document.getElementById('staffSearch').value.trim().toLowerCase();
+        let shown = 0;
+        document.querySelectorAll('.staff-row').forEach(row => {
+            const match = row.textContent.toLowerCase().includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) shown++;
+        });
+        const hasRows = document.querySelectorAll('.staff-row').length > 0;
+        document.getElementById('noResults').style.display = (hasRows && shown === 0) ? 'block' : 'none';
+        updateCounts();
+    }
+
+    /* Photo preview + validation */
+    function setPreview(url) {
+        const box = document.getElementById('photoPreview');
+        box.innerHTML = '';
+        if (url) {
+            const img = new Image();
+            img.alt = 'Photo preview';
+            img.src = url;
+            box.appendChild(img);
+        } else {
+            box.innerHTML = '<i class="bi bi-camera"></i>';
+        }
+    }
+
+    document.getElementById('staffPhoto').addEventListener('change', function () {
+        const f = this.files[0];
+        if (!f) { setPreview(null); return; }
+        if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+            alert('Please choose a JPG, PNG or WebP image.');
+            this.value = ''; setPreview(null); return;
+        }
+        if (f.size > MAX_PHOTO) {
+            alert('The photo must be 2 MB or smaller.');
+            this.value = ''; setPreview(null); return;
+        }
+        setPreview(URL.createObjectURL(f));
+    });
+
+    /* Form: edit / reset */
+    function pulseForm() {
+        const panel = document.getElementById('formPanel');
+        panel.classList.remove('pulse');
+        void panel.offsetWidth;
+        panel.classList.add('pulse');
+    }
+
+    function handleEditClick(btn) {
+        const id = btn.getAttribute('data-id');
+        document.getElementById('staffFormTitle').innerText = 'Edit Staff Member';
+        document.getElementById('staffFormHint').innerText = 'Update the details; choose a photo only to replace it';
+        document.getElementById('formIcon').className = 'bi bi-pencil-fill';
+        setFormAction('/admin/staff/update/' + id);
+        document.getElementById('staffId').value = id || '';
+        document.getElementById('staffFullName').value = btn.getAttribute('data-fullname') || '';
+        document.getElementById('staffEmail').value = btn.getAttribute('data-email') || '';
+        document.getElementById('staffPhone').value = btn.getAttribute('data-phone') || '';
+        document.getElementById('staffRole').value = btn.getAttribute('data-role') || '';
+        document.getElementById('staffPhoto').value = '';
+        setPreview(btn.getAttribute('data-photo'));
+        document.getElementById('saveStaffBtn').innerText = 'Update Member';
+        document.getElementById('cancelStaffBtn').style.display = 'block';
+
+        document.querySelectorAll('.staff-row').forEach(r => r.classList.remove('is-editing'));
+        btn.closest('.staff-row').classList.add('is-editing');
+        pulseForm();
+        document.getElementById('formPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function resetStaffForm() {
+        document.getElementById('staffFormTitle').innerText = 'Add New Staff Member';
+        document.getElementById('staffFormHint').innerText = 'Fill in the details below';
+        document.getElementById('formIcon').className = 'bi bi-person-plus-fill';
+        form.reset();
+        setFormAction('/admin/staff/add');
+        document.getElementById('staffId').value = '';
+        setPreview(null);
+        document.getElementById('saveStaffBtn').innerText = 'Save Member';
+        document.getElementById('cancelStaffBtn').style.display = 'none';
+        document.querySelectorAll('.staff-row').forEach(r => r.classList.remove('is-editing'));
+        pulseForm();
+    }
+</script>
+
+</body>
+</html>
