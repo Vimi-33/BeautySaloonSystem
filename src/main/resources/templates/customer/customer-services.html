@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Our Services · Aurelia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/customer-dashboard.css}" href="/css/customer-dashboard.css">
+
+    <style>
+        /* Scoped with sv- so nothing clashes with customer-dashboard.css */
+        .sv-page { --pink: #ee86ab; --pink-deep: #d65f8d; --glass: rgba(44, 22, 31, .62);
+                   --line: rgba(255,255,255,.09); --muted: rgba(255,255,255,.62); }
+        .sv-head h1 { font-family: 'Playfair Display', serif; font-size: 2.9rem; color: #fff; margin: 0 0 .4rem; }
+        .sv-head p  { color: var(--muted); font-size: 1.05rem; margin: 0 0 1.75rem; }
+
+        .sv-toolbar { display: flex; flex-wrap: wrap; gap: .9rem; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .sv-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .sv-chip { font: 500 .9rem 'Inter', sans-serif; color: #fff; cursor: pointer;
+                   background: rgba(255,255,255,.06); border: 1px solid var(--line);
+                   padding: .55rem 1.1rem; border-radius: 999px; transition: background .2s, border-color .2s; }
+        .sv-chip:hover { background: rgba(255,255,255,.12); }
+        .sv-chip[aria-pressed="true"] { background: linear-gradient(135deg, rgba(238,134,171,.35), rgba(214,95,141,.25)); border-color: var(--pink); }
+        .sv-search { font: 400 .95rem 'Inter', sans-serif; color: #fff; min-width: 250px;
+                     background: rgba(255,255,255,.07); border: 1px solid var(--line);
+                     padding: .65rem 1.1rem; border-radius: 999px; }
+        .sv-search::placeholder { color: var(--muted); }
+        .sv-chip:focus-visible, .sv-search:focus-visible, .sv-item:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+        .sv-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 1.75rem; align-items: start; }
+
+        /* Left: the printed-menu column */
+        .sv-menu { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line);
+                   border-radius: 28px; padding: 1.25rem 1.5rem 1.5rem; }
+        .sv-group + .sv-group { margin-top: 1.25rem; }
+        .sv-group h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #fff; margin: .5rem 0 .4rem; }
+        .sv-item { display: block; width: 100%; text-align: left; cursor: pointer; color: #fff; font-family: 'Inter', sans-serif;
+                   background: none; border: 0; border-radius: 16px; padding: .85rem 1rem; transition: background .2s; }
+        .sv-item:hover { background: rgba(255,255,255,.06); }
+        .sv-item[aria-pressed="true"] { background: linear-gradient(135deg, rgba(238,134,171,.2), rgba(214,95,141,.1)); box-shadow: inset 3px 0 0 var(--pink); }
+        .sv-line { display: flex; align-items: baseline; gap: .6rem; }
+        .sv-name { font-weight: 500; font-size: 1.02rem; }
+        .sv-dots { flex: 1; border-bottom: 2px dotted rgba(255,255,255,.2); transform: translateY(-4px); min-width: 20px; }
+        .sv-price { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 1.1rem; color: var(--pink); }
+        .sv-sub { margin-top: .2rem; font-size: .83rem; color: var(--muted); }
+
+        /* Right: the spotlight card, styled like the profile summary */
+        .sv-spot { position: sticky; top: 1.5rem; background: var(--glass); backdrop-filter: blur(16px);
+                   border: 1px solid var(--line); border-radius: 28px; padding: 2rem; color: #fff; }
+        .sv-tag { display: inline-block; font: 600 .78rem 'Inter', sans-serif; color: #f6b7cd;
+                  background: rgba(238,134,171,.15); border: 1px solid rgba(238,134,171,.3);
+                  padding: .3rem .8rem; border-radius: 999px; margin-bottom: .8rem; }
+        .sv-spot h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin: 0 0 .75rem; line-height: 1.2; }
+        .sv-spot p { color: rgba(255,255,255,.78); line-height: 1.65; margin: 0 0 1.5rem; font-size: .98rem; }
+        .sv-stats { display: flex; gap: 2.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+        .sv-stat b { display: block; font: 600 1.6rem 'Playfair Display', serif; }
+        .sv-stat span { font-size: .85rem; color: var(--muted); }
+
+        .sv-empty { display: none; text-align: center; padding: 2rem 0 1rem; color: var(--muted); }
+        .sv-src { display: none; }
+
+        @media (max-width: 960px) {
+            .main-content { margin-left: 0 !important; padding: 1.25rem !important; }
+            .sv-layout { grid-template-columns: 1fr; }
+            .sv-spot { position: static; order: -1; }
+            .sv-head h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+<div class="bg-photo"></div>
+<div class="bg-tint"></div>
+
+<div class="app-shell" style="display: flex; min-height: 100vh; position: relative; z-index: 10;">
+
+    <!-- Sidebar Navigation (unchanged) -->
+    <aside class="sidebar" id="sidebar">
+        <a class="sidebar-brand" href="#">
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
+                <path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.6 8.3 2.3 4.8 5.7 4.2 8 3.8 10.2 5 12 7.4 13.8 5 16 3.8 18.3 4.2c3.4.6 5.1 4.1 3.7 7.5C19.5 16.4 12 21 12 21z"/>
+            </svg>
+            <span>Aurelia Beauty Salon</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a class="nav-link" th:href="@{/customer/dashboard}"><span>Overview</span></a>
+            <a class="nav-link" th:href="@{/customer/appointments}"><span>Appointments</span></a>
+            <a class="nav-link" th:href="@{/customer/staff}"><span>Staff</span></a>
+            <a class="nav-link nav-link--active" th:href="@{/customer/services}"><span>Services</span></a>
+            <a class="nav-link" th:href="@{/customer/profile}"><span>Profile</span></a>
+        </nav>
+
+        <form th:action="@{/logout}" method="post" class="sidebar-logout">
+            <button class="btn-ghost btn-ghost--block" type="submit"><span>Log out</span></button>
+        </form>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content sv-page" style="flex: 1; margin-left: 260px; padding: 2.5rem; position: relative; z-index: 20;">
+
+        <header class="sv-head">
+            <h1>Our services</h1>
+            <p>Browse the menu and tap a treatment to see the details.</p>
+        </header>
+
+        <div class="sv-toolbar">
+            <div class="sv-chips" id="svChips" role="group" aria-label="Filter by category"></div>
+            <input class="sv-search" id="svSearch" type="search" placeholder="Search treatments" aria-label="Search treatments">
+        </div>
+
+        <div class="sv-layout">
+            <section class="sv-menu" id="svMenu" aria-label="Treatment menu">
+                <div class="sv-empty" id="svEmpty" th:attr="data-none=${services == null or #lists.isEmpty(services)}">No treatments match your search.</div>
+            </section>
+
+            <aside class="sv-spot" id="svSpot" aria-live="polite">
+                <span class="sv-tag" id="spCat">Category</span>
+                <h3 id="spName">Select a treatment</h3>
+                <p id="spDesc"></p>
+                <div class="sv-stats">
+                    <div class="sv-stat"><b id="spDur">-</b><span>Duration</span></div>
+                    <div class="sv-stat"><b id="spPrice">-</b><span>Price</span></div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Data source: the services table, passed in by the controller as "services" -->
+        <ul class="sv-src" id="svSource">
+            <li th:each="srv : ${services}"
+                th:attr="data-name=${srv.name},
+                         data-category=${#strings.isEmpty(srv.category) ? 'Other' : srv.category},
+                         data-price=${srv.price},
+                         data-duration=${srv.durationMinutes},
+                         data-desc=${srv.description}"></li>
+        </ul>
+    </main>
+</div>
+
+<script>
+    (function () {
+        var items = Array.prototype.map.call(document.querySelectorAll('#svSource li'), function (li) {
+            var d = li.dataset;
+            return { name: d.name, cat: d.category || 'Other', price: d.price, dur: d.duration, desc: d.desc };
+        });
+        var menu = document.getElementById('svMenu'), chips = document.getElementById('svChips'),
+            search = document.getElementById('svSearch'), empty = document.getElementById('svEmpty');
+        var active = 'All', selected = items[0] || null, buttons = [];
+
+        var money = function (p) { return p ? '$' + p : 'Ask in salon'; };
+        var mins  = function (m) { return m ? m + ' min' : '-'; };
+
+        // Category chips
+        var cats = ['All'];
+        items.forEach(function (i) { if (cats.indexOf(i.cat) < 0) cats.push(i.cat); });
+        if (cats.length <= 2) { chips.style.display = 'none'; }
+        cats.forEach(function (c) {
+            var b = document.createElement('button');
+            b.type = 'button'; b.className = 'sv-chip'; b.textContent = c;
+            b.addEventListener('click', function () { active = c; render(); });
+            chips.appendChild(b);
+        });
+
+        function show(i) {
+            selected = i;
+            document.getElementById('spCat').textContent = i.cat;
+            document.getElementById('spName').textContent = i.name;
+            document.getElementById('spDesc').textContent = i.desc || 'Ask our team for more about this treatment.';
+            document.getElementById('spDur').textContent = mins(i.dur);
+            document.getElementById('spPrice').textContent = money(i.price);
+            buttons.forEach(function (b) { b.el.setAttribute('aria-pressed', b.item === i ? 'true' : 'false'); });
+        }
+
+        function render() {
+            var q = search.value.trim().toLowerCase();
+            var list = items.filter(function (i) {
+                return (active === 'All' || i.cat === active) &&
+                       (!q || (i.name + ' ' + (i.desc || '') + ' ' + i.cat).toLowerCase().indexOf(q) >= 0);
+            });
+            Array.prototype.forEach.call(chips.children, function (b) {
+                b.setAttribute('aria-pressed', b.textContent === active ? 'true' : 'false');
+            });
+            Array.prototype.slice.call(menu.querySelectorAll('.sv-group')).forEach(function (g) { g.remove(); });
+            buttons = [];
+            empty.textContent = items.length ? 'No treatments match your search.' : 'No services have been added yet.';
+            empty.style.display = list.length ? 'none' : 'block';
+
+            var groups = {};
+            list.forEach(function (i) { (groups[i.cat] = groups[i.cat] || []).push(i); });
+            Object.keys(groups).forEach(function (c) {
+                var g = document.createElement('div'); g.className = 'sv-group';
+                var h = document.createElement('h2'); h.textContent = c; g.appendChild(h);
+                groups[c].forEach(function (i) {
+                    var b = document.createElement('button');
+                    b.type = 'button'; b.className = 'sv-item';
+                    var line = document.createElement('div'); line.className = 'sv-line';
+                    var n = document.createElement('span'); n.className = 'sv-name'; n.textContent = i.name;
+                    var dots = document.createElement('span'); dots.className = 'sv-dots';
+                    var p = document.createElement('span'); p.className = 'sv-price'; p.textContent = i.price ? '$' + i.price : '';
+                    line.appendChild(n); line.appendChild(dots); line.appendChild(p);
+                    var sub = document.createElement('div'); sub.className = 'sv-sub'; sub.textContent = mins(i.dur);
+                    b.appendChild(line); b.appendChild(sub);
+                    b.addEventListener('click', function () { show(i); });
+                    g.appendChild(b);
+                    buttons.push({ el: b, item: i });
+                });
+                menu.insertBefore(g, empty);
+            });
+            if (list.length && list.indexOf(selected) < 0) selected = list[0];
+            if (selected) show(selected);
+        }
+
+        search.addEventListener('input', render);
+        render();
+    })();
+</script>
+
+</body>
+</html>
