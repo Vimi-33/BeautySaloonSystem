@@ -40,7 +40,8 @@
   --radius-md: 14px;
   --radius-pill: 999px;
 
-  --sidebar-w: 264px;
+  --sidebar-w: 264px;           /* expanded (on hover / mobile) */
+  --sidebar-w-collapsed: 80px;  /* glass rail */
 
   /* -- background photo --------------------------------------------------
      Point this at your image. Drop the file in
@@ -154,35 +155,57 @@ button, input {
   min-height: 100vh;
 }
 
-/* -- Sidebar --------------------------------------------------------------*/
+/* -- Sidebar: glassmorphism rail that expands on hover ------------------- */
 
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: var(--sidebar-w);
-  padding: 28px 20px;
+  width: var(--sidebar-w-collapsed);
+  padding: 28px 14px;
   display: flex;
   flex-direction: column;
   gap: 28px;
-  background: var(--panel-bg);
-  border-right: 1px solid var(--panel-border-soft);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  overflow: hidden;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(232, 147, 173, 0.08) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    8px 0 40px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
   z-index: 40;
-  transition: transform 0.25s ease;
+  transition:
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.25s ease;
+}
+
+.sidebar:hover {
+  width: var(--sidebar-w);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 40%, rgba(232, 147, 173, 0.12) 100%);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 60px rgba(232, 147, 173, 0.2),
+    12px 0 50px rgba(0, 0, 0, 0.5);
 }
 
 .sidebar-brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 8px;
+  padding: 0 14px;
   font-family: var(--font-serif);
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--text-cream);
+  white-space: nowrap;
 }
 
 .sidebar-brand svg {
@@ -207,6 +230,7 @@ button, input {
   color: var(--text-muted);
   font-size: 0.92rem;
   font-weight: 500;
+  white-space: nowrap;
   border-left: 2px solid transparent;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -231,6 +255,22 @@ button, input {
   border-left-color: var(--pink-300);
 }
 
+/* labels: hidden on the rail, fade in when the sidebar expands */
+.nav-link span,
+.sidebar-brand span,
+.btn-ghost span {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.25s ease 0.05s, transform 0.3s ease 0.05s;
+}
+
+.sidebar:hover .nav-link span,
+.sidebar:hover .sidebar-brand span,
+.sidebar:hover .btn-ghost span {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 .sidebar-logout {
   margin-top: auto;
 }
@@ -246,6 +286,7 @@ button, input {
   color: var(--text-muted);
   font-size: 0.88rem;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
@@ -253,6 +294,7 @@ button, input {
 .btn-ghost svg {
   width: 17px;
   height: 17px;
+  flex-shrink: 0;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -272,7 +314,7 @@ button, input {
 /* -- Main column ------------------------------------------------------- */
 
 .app-main {
-  margin-left: var(--sidebar-w);
+  margin-left: var(--sidebar-w-collapsed);
   min-height: 100vh;
   position: relative;
   padding: 0 48px 96px;
@@ -365,7 +407,7 @@ button, input {
 }
 
 .stat-card--top-right { top: 28px; right: 32px; }
-.stat-card--bottom-left { bottom: 28px; left: calc(var(--sidebar-w) + 32px); }
+.stat-card--bottom-left { bottom: 28px; left: calc(var(--sidebar-w-collapsed) + 32px); }
 .stat-card--bottom-right { bottom: 28px; right: 32px; }
 
 .stat-icon {
@@ -702,13 +744,27 @@ button, input {
    ========================================================================== */
 
 @media (max-width: 900px) {
+  /* mobile: full-width drawer with labels always visible, no hover rail */
   .sidebar {
+    width: var(--sidebar-w);
+    padding: 28px 20px;
     transform: translateX(-100%);
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
   }
 
+  .sidebar:hover {
+    width: var(--sidebar-w);
+  }
+
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  .nav-link span,
+  .sidebar-brand span,
+  .btn-ghost span {
+    opacity: 1;
+    transform: none;
   }
 
   .app-main {

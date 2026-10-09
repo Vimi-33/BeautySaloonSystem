@@ -28,12 +28,11 @@ import java.nio.file.Paths;
 @EnableMethodSecurity
 public class SecurityConfig implements WebMvcConfigurer {
 
-    // Serves uploaded staff photos from the "uploads" folder at /uploads/**
+    // Serves uploaded photos/images from the "uploads" directory at /uploads/**
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         Path uploadRoot = Paths.get("uploads").toAbsolutePath();
         try {
-            // The folder must exist at startup, otherwise the location has no trailing "/"
             Files.createDirectories(uploadRoot);
         } catch (IOException e) {
             throw new IllegalStateException("Could not create upload folder: " + uploadRoot, e);
@@ -59,7 +58,7 @@ public class SecurityConfig implements WebMvcConfigurer {
             return org.springframework.security.core.userdetails.User.builder()
                     .username(user.getEmail())
                     .password(user.getPassword())
-                    .roles(user.getRoleName()) // "CUSTOMER" or "ADMIN"
+                    .roles(user.getRoleName()) // e.g., "CUSTOMER" or "ADMIN"
                     .build();
         };
     }
@@ -94,14 +93,12 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/register", "/login", "/style.css", "/script.js",
                                 "/*.jpg", "/*.jpeg", "/*.png", "/*.svg", "/css/**", "/js/**").permitAll()
-                        // Staff photos: any logged-in customer or admin may view them
                         .requestMatchers("/uploads/**").hasAnyRole("CUSTOMER", "ADMIN")
-                        .requestMatchers("/customer/**", "/appointments/book", "/appointments/my-bookings").hasRole("CUSTOMER")
+                        // Explicitly include purchase endpoint alongside customer URLs
+                        .requestMatchers("/customer/**", "/customer/products/purchase/**", "/appointments/book", "/appointments/my-bookings").hasRole("CUSTOMER")
                         .requestMatchers("/admin/**", "/appointments/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                // CSRF stays ON (default). The admin staff form sends its token both as a
-                // hidden field and in the URL, so photo uploads (multipart) are accepted.
                 .formLogin(form -> form
                         .loginPage("/login")
                         .successHandler(successHandler)

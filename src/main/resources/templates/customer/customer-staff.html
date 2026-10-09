@@ -6,23 +6,100 @@
     <title>Our Specialists · Aurelia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/customer-dashboard.css}" href="/css/customer-dashboard.css">
 
     <style>
-        /* Scoped with st- so nothing clashes with customer-dashboard.css */
-        .st-page { --pink: #ee86ab; --glass: rgba(44, 22, 31, .62); --line: rgba(255,255,255,.09); --muted: rgba(255,255,255,.62); }
+        /* ===== Floating glass sidebar (same look as the dashboard) — scoped with nb- ===== */
+        .nb-sidebar {
+            position: fixed; z-index: 50; left: 1.25rem; top: 1.25rem; bottom: 1.25rem;
+            width: 5rem; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(160deg, rgba(21, 9, 19, 0.92) 0%, rgba(15, 6, 14, 0.96) 100%);
+            backdrop-filter: blur(26px) saturate(170%);
+            -webkit-backdrop-filter: blur(26px) saturate(170%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 1.75rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+            transition: width .35s cubic-bezier(.4,0,.2,1), box-shadow .35s ease, transform .3s ease;
+        }
+        .nb-sidebar:hover {
+            width: 18rem;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 60px rgba(223,140,169,0.20), 12px 16px 50px rgba(0,0,0,0.55);
+        }
+        .nb-top, .nb-bottom { padding: 1rem .75rem; }
+        .nb-bottom { border-top: 1px solid rgba(255,255,255,.1); }
+
+        .nb-brand { display: flex; align-items: center; gap: .75rem; padding-bottom: 1.5rem; margin: 0 .1rem;
+                    border-bottom: 1px solid rgba(255,255,255,.1); text-decoration: none; }
+        .nb-brand-icon { flex: none; font-size: 1.5rem; line-height: 1; color: #df8ca9; }
+        .nb-brand-text { font: 600 1.25rem 'Playfair Display', serif; letter-spacing: -.01em; color: #fff; white-space: nowrap; transition: color .2s, opacity .25s ease .05s, transform .3s ease .05s; }
+        .nb-brand:hover .nb-brand-text { color: #df8ca9; }
+
+        .nb-nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: .5rem; }
+        .nb-link { display: flex; align-items: center; gap: .75rem; padding: .75rem .85rem; border-radius: .75rem;
+                   font-size: .875rem; font-weight: 500; color: #d1d5db; text-decoration: none;
+                   transition: background .2s, color .2s; }
+        .nb-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+        .nb-link.nb-active { background: rgba(223,140,169,.18); color: #df8ca9; }
+        .nb-link svg { flex: none; width: 20px; height: 20px; }
+        .nb-link span { white-space: nowrap; transition: opacity .25s ease .05s, transform .3s ease .05s; }
+
+        .nb-logout { display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%;
+                     padding: .65rem 0; border-radius: 1rem; cursor: pointer;
+                     font: 400 .75rem 'JetBrains Mono', monospace; letter-spacing: .05em; text-transform: uppercase; color: #d1d5db;
+                     background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.15);
+                     backdrop-filter: blur(12px); transition: all .3s ease; }
+        .nb-logout:hover { color: #fff; background: rgba(255,255,255,.1); border-color: rgba(223,140,169,.5); }
+        .nb-logout svg { flex: none; width: 16px; height: 16px; }
+
+        .nb-toggle { display: none; }
+        .nb-overlay { display: none; }
+
+        /* Desktop: collapsed rail, labels fade in on hover */
+        @media (min-width: 1024px) {
+            .nb-brand-text, .nb-link span { opacity: 0; transform: translateX(-8px); }
+            .nb-sidebar:hover .nb-brand-text, .nb-sidebar:hover .nb-link span { opacity: 1; transform: translateX(0); }
+            .nb-logout span { display: none; }
+            .nb-sidebar:hover .nb-logout span { display: inline; }
+            .nb-sidebar:hover .nb-logout { padding-left: 1rem; padding-right: 1rem; }
+        }
+
+        /* Mobile: slide-in drawer with a toggle button */
+        @media (max-width: 1023px) {
+            .nb-sidebar { width: 18rem; transform: translateX(-120%); }
+            .nb-sidebar.nb-open { transform: translateX(0); }
+            .nb-link { border-radius: 1rem; }
+            .nb-logout { padding: .65rem 1rem; }
+            .nb-toggle { display: grid; place-items: center; position: fixed; z-index: 45; top: 1rem; left: 1rem;
+                         width: 44px; height: 44px; border-radius: 14px; cursor: pointer; color: #fff;
+                         background: rgba(21,9,19,.65); border: 1px solid rgba(255,255,255,.1);
+                         backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+            .nb-toggle svg { width: 24px; height: 24px; }
+            .nb-overlay { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.6);
+                          backdrop-filter: blur(4px); }
+            .nb-overlay.nb-show { display: block; }
+        }
+
+        /* ===== Page styles — scoped with st- ===== */
+        .st-page { --pink: #ee86ab; --glass: rgba(44, 22, 31, .62); --line: rgba(255,255,255,.09); --muted: rgba(255,255,255,.62);
+                   flex: 1; min-width: 0; margin-left: 7.5rem; padding: 2.5rem; position: relative; z-index: 20; }
         .st-head h1 { font-family: 'Playfair Display', serif; font-size: 2.9rem; color: #fff; margin: 0 0 .4rem; }
         .st-head p  { color: var(--muted); font-size: 1.05rem; margin: 0 0 1.75rem; }
 
-        /* Summary bar, same shape as the profile summary card */
-        .st-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;
-                      background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line);
-                      border-radius: 28px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; color: #fff; }
-        .st-summary h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin: 0 0 .25rem; }
-        .st-summary p { margin: 0; color: var(--muted); }
+        /* Summary banner with embedded bokeh canvas */
+        .st-summary { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;
+                      background: rgba(35, 15, 25, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(238,134,171,0.3);
+                      border-radius: 28px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; color: #fff;
+                      box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+        .st-summary canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .st-summary > * { position: relative; z-index: 1; }
+
+        .st-summary h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin: 0 0 .25rem; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .st-summary p { margin: 0; color: rgba(255,255,255,.85); text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
         .st-stats { display: flex; gap: 2.25rem; }
-        .st-stat b { display: block; font: 600 1.7rem 'Playfair Display', serif; }
+        .st-stat b { display: block; font: 600 1.7rem 'Playfair Display', serif; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
         .st-stat span { font-size: .85rem; color: var(--muted); }
 
         .st-toolbar { display: flex; flex-wrap: wrap; gap: .9rem; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
@@ -34,7 +111,8 @@
         .st-search { font: 400 .95rem 'Inter', sans-serif; color: #fff; min-width: 250px; background: rgba(255,255,255,.07);
                      border: 1px solid var(--line); padding: .65rem 1.1rem; border-radius: 999px; }
         .st-search::placeholder { color: var(--muted); }
-        .st-chip:focus-visible, .st-search:focus-visible, .st-contact:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+        .st-chip:focus-visible, .st-search:focus-visible, .st-contact:focus-visible,
+        .nb-link:focus-visible, .nb-logout:focus-visible, .nb-toggle:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
         .st-group { margin-bottom: 2.25rem; }
         .st-group h3 { font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #fff; margin: 0 0 1rem;
@@ -65,9 +143,15 @@
                     background: var(--glass); border: 1px solid var(--line); border-radius: 28px; }
         .st-src { display: none; }
 
+        @media (max-width: 1023px) {
+            .st-page { margin-left: 0; padding: 4.5rem 1.25rem 1.25rem; }
+        }
         @media (max-width: 960px) {
-            .main-content { margin-left: 0 !important; padding: 1.25rem !important; }
             .st-head h1 { font-size: 2.2rem; }
+        }
+        @media (min-width: 1024px) {
+            .st-page { transition: margin-left .35s cubic-bezier(.4,0,.2,1); }
+            .nb-sidebar:hover ~ .st-page { margin-left: 20.5rem; }
         }
     </style>
 </head>
@@ -76,39 +160,92 @@
 <div class="bg-photo"></div>
 <div class="bg-tint"></div>
 
+<button class="nb-toggle" id="nbToggle" type="button" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+<div class="nb-overlay" id="nbOverlay"></div>
+
 <div class="app-shell" style="display: flex; min-height: 100vh; position: relative; z-index: 10;">
 
-    <!-- Sidebar Navigation (unchanged) -->
-    <aside class="sidebar" id="sidebar">
-        <a class="sidebar-brand" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-                <path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.6 8.3 2.3 4.8 5.7 4.2 8 3.8 10.2 5 12 7.4 13.8 5 16 3.8 18.3 4.2c3.4.6 5.1 4.1 3.7 7.5C19.5 16.4 12 21 12 21z"/>
-            </svg>
-            <span>Aurelia Beauty Salon</span>
-        </a>
+    <!-- Floating glass sidebar (same as the dashboard) -->
+    <aside class="nb-sidebar" id="nbSidebar">
+        <div class="nb-top">
+            <a class="nb-brand" href="#">
+                <span class="nb-brand-icon">🌸</span>
+                <span class="nb-brand-text">Aurelia Salon</span>
+            </a>
 
-        <nav class="sidebar-nav">
-            <a class="nav-link" th:href="@{/customer/dashboard}"><span>Overview</span></a>
-            <a class="nav-link" th:href="@{/customer/appointments}"><span>Appointments</span></a>
-            <a class="nav-link nav-link--active" th:href="@{/customer/staff}"><span>Staff</span></a>
-            <a class="nav-link" th:href="@{/customer/services}"><span>Services</span></a>
-            <a class="nav-link" th:href="@{/customer/profile}"><span>Profile</span></a>
-        </nav>
+            <nav class="nb-nav">
+                <a class="nb-link" th:href="@{/customer/dashboard}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11.5L12 4l8 7.5M6 10v9h12v-9"/>
+                    </svg>
+                    <span>Overview</span>
+                </a>
 
-        <form th:action="@{/logout}" method="post" class="sidebar-logout">
-            <button class="btn-ghost btn-ghost--block" type="submit"><span>Log out</span></button>
-        </form>
+                <a class="nb-link" th:href="@{/customer/appointments}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="3" y="5" width="18" height="16" rx="2" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5h18M8 3v3M16 3v3"/>
+                    </svg>
+                    <span>Appointments</span>
+                </a>
+
+                <a class="nb-link nb-active" th:href="@{/customer/staff}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11a3.5 3.5 0 10-3.5-3.5M8.5 11a3 3 0 10-3-3M2.5 19c.6-2.6 2.9-4.3 6-4.3s5.4 1.7 6 4.3M13 14.9c2.6.2 4.6 1.8 5.1 4.1"/>
+                    </svg>
+                    <span>Staff</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/services}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4L12 3zM19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/>
+                    </svg>
+                    <span>Services</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/products}" href="#">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 7h12l1 13H5L6 7z"/>
+                        <path d="M9 7a3 3 0 0 1 6 0"/>
+                    </svg>
+                    <span>Products</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/profile}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="12" cy="8" r="3.4" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5"/>
+                    </svg>
+                    <span>Profile</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="nb-bottom">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nb-logout">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    <span>Log Out</span>
+                </button>
+            </form>
+        </div>
     </aside>
 
     <!-- Main Workspace -->
-    <main class="main-content st-page" style="flex: 1; margin-left: 260px; padding: 2.5rem; position: relative; z-index: 20;">
+    <main class="main-content st-page">
 
         <header class="st-head">
             <h1>Meet our team</h1>
             <p>The specialists and stylists who look after you at Aurelia.</p>
         </header>
 
-        <section class="st-summary">
+        <!-- Summary section with embedded bokeh canvas -->
+        <section class="st-summary" id="stSummary">
+            <canvas id="summaryCanvas"></canvas>
             <div>
                 <h2>Our specialists</h2>
                 <p>Filter by role or search for someone by name.</p>
@@ -139,6 +276,17 @@
         </ul>
     </main>
 </div>
+
+<script>
+    // Mobile menu toggle
+    (function () {
+        var sb = document.getElementById('nbSidebar'), ov = document.getElementById('nbOverlay'),
+            tg = document.getElementById('nbToggle');
+        function toggle() { sb.classList.toggle('nb-open'); ov.classList.toggle('nb-show'); }
+        tg.addEventListener('click', toggle);
+        ov.addEventListener('click', toggle);
+    })();
+</script>
 
 <script>
     (function () {
@@ -237,6 +385,91 @@
 
         search.addEventListener('input', render);
         render();
+    })();
+</script>
+
+<!-- Butter-Smooth Liquid Bokeh Orbs FX for the Summary Banner -->
+<script>
+    (function () {
+        var box = document.getElementById('stSummary');
+        var canvas = document.getElementById('summaryCanvas');
+        if (!box || !canvas) return;
+        var ctx = canvas.getContext('2d', { alpha: false });
+
+        var width, height, orbs = [];
+        var mouseX = -1000, mouseY = -1000;
+        var orbCount = 14;
+
+        function resize() {
+            width = box.clientWidth;
+            height = box.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+            initOrbs();
+        }
+
+        function initOrbs() {
+            orbs = [];
+            for (let i = 0; i < orbCount; i++) {
+                orbs.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 22 + 8,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    color: Math.random() > 0.3 ? 'rgba(238, 134, 171, ' : 'rgba(255, 215, 0, ',
+                    alpha: Math.random() * 0.35 + 0.15
+                });
+            }
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        box.addEventListener('mousemove', function (e) {
+            var r = box.getBoundingClientRect();
+            mouseX = e.clientX - r.left;
+            mouseY = e.clientY - r.top;
+        });
+
+        box.addEventListener('mouseleave', function () {
+            mouseX = -1000;
+            mouseY = -1000;
+        });
+
+        function draw() {
+            ctx.fillStyle = '#230f19';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < orbs.length; i++) {
+                let o = orbs[i];
+                o.x += o.vx;
+                o.y += o.vy;
+
+                if (o.x - o.radius < 0 || o.x + o.radius > width) o.vx *= -1;
+                if (o.y - o.radius < 0 || o.y + o.radius > height) o.vy *= -1;
+
+                let dx = o.x - mouseX;
+                let dy = o.y - mouseY;
+                let dist = Math.hypot(dx, dy);
+                if (dist < 90) {
+                    let angle = Math.atan2(dy, dx);
+                    o.x += Math.cos(angle) * 1.5;
+                    o.y += Math.sin(angle) * 1.5;
+                }
+
+                ctx.beginPath();
+                ctx.arc(o.x, o.y, o.radius, 0, Math.PI * 2);
+                ctx.fillStyle = o.color + o.alpha + ')';
+                ctx.shadowColor = '#ee86ab';
+                ctx.shadowBlur = 12;
+                ctx.fill();
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
     })();
 </script>
 
