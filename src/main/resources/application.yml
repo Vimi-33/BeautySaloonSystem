@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/SaloonManagement?createDatabaseIfNotExist=true
     username: root
-    password: Vimi#2006
+    password: YOUR PASSWORD
 
   jpa:
     hibernate:
