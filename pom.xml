@@ -112,8 +112,8 @@
                 <version>13.3.0</version>
                 <configuration>
                     <url>jdbc:mysql://localhost:3306/SaloonManagement?createDatabaseIfNotExist=true</url>
-                    <user>root</user>
-                    <password>YOUR PASSOWRD</password>
+                    <user>YOUR USERNAME</user>
+                    <password>YOUR PASSWORD</password>
                     <cleanDisabled>false</cleanDisabled>
                 </configuration>
 
