@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Our Services · Aurelia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/customer-dashboard.css}" href="/css/customer-dashboard.css">
+
+    <style>
+
+        /* Scoped with sv- so nothing clashes with customer-dashboard.css */
+        .sv-page { --pink: #ee86ab; --pink-deep: #d65f8d; --glass: rgba(44, 22, 31, .62);
+                   --line: rgba(255,255,255,.09); --muted: rgba(255,255,255,.62);
+                   flex: 1; min-width: 0; margin-left: 7.5rem; padding: 2.5rem; position: relative; z-index: 20;
+                   transition: margin-left .35s cubic-bezier(.4,0,.2,1); }
+        .sv-head h1 { font-family: 'Playfair Display', serif; font-size: 2.9rem; color: #fff; margin: 0 0 .4rem; }
+        .sv-head p  { color: var(--muted); font-size: 1.05rem; margin: 0 0 1.75rem; }
+
+        .sv-toolbar { display: flex; flex-wrap: wrap; gap: .9rem; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .sv-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .sv-chip { font: 500 .9rem 'Inter', sans-serif; color: #fff; cursor: pointer;
+                   background: rgba(255,255,255,.06); border: 1px solid var(--line);
+                   padding: .55rem 1.1rem; border-radius: 999px; transition: background .2s, border-color .2s; }
+        .sv-chip:hover { background: rgba(255,255,255,.12); }
+        .sv-chip[aria-pressed="true"] { background: linear-gradient(135deg, rgba(238,134,171,.35), rgba(214,95,141,.25)); border-color: var(--pink); }
+        .sv-search { font: 400 .95rem 'Inter', sans-serif; color: #fff; min-width: 250px;
+                     background: rgba(255,255,255,.07); border: 1px solid var(--line);
+                     padding: .65rem 1.1rem; border-radius: 999px; }
+        .sv-search::placeholder { color: var(--muted); }
+        .sv-chip:focus-visible, .sv-search:focus-visible, .sv-item:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+        .sv-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 1.75rem; align-items: start; }
+
+        /* Left: the printed-menu column */
+        .sv-menu { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line);
+                   border-radius: 28px; padding: 1.25rem 1.5rem 1.5rem; }
+        .sv-group + .sv-group { margin-top: 1.25rem; }
+        .sv-group h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #fff; margin: .5rem 0 .4rem; }
+        .sv-item { display: block; width: 100%; text-align: left; cursor: pointer; color: #fff; font-family: 'Inter', sans-serif;
+                   background: none; border: 0; border-radius: 16px; padding: .85rem 1rem; transition: background .2s; }
+        .sv-item:hover { background: rgba(255,255,255,.06); }
+        .sv-item[aria-pressed="true"] { background: linear-gradient(135deg, rgba(238,134,171,.2), rgba(214,95,141,.1)); box-shadow: inset 3px 0 0 var(--pink); }
+        .sv-line { display: flex; align-items: baseline; gap: .6rem; }
+        .sv-name { font-weight: 500; font-size: 1.02rem; }
+        .sv-dots { flex: 1; border-bottom: 2px dotted rgba(255,255,255,.2); transform: translateY(-4px); min-width: 20px; }
+        .sv-price { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 1.1rem; color: var(--pink); }
+        .sv-sub { margin-top: .2rem; font-size: .83rem; color: var(--muted); }
+
+        /* Right column wrapper */
+        .sv-side { position: sticky; top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+        /* Right Top: Treatment Spotlight Card */
+        .sv-spot { position: relative; overflow: hidden; background: rgba(35, 15, 25, 0.75); backdrop-filter: blur(16px);
+                   border: 1px solid rgba(238,134,171,0.3); border-radius: 28px; padding: 2rem; color: #fff;
+                   box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+        .sv-spot canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .sv-spot > * { position: relative; z-index: 1; }
+
+        .sv-tag { display: inline-block; font: 600 .78rem 'Inter', sans-serif; color: #f6b7cd;
+                  background: rgba(238,134,171,.2); border: 1px solid rgba(238,134,171,.4);
+                  padding: .3rem .8rem; border-radius: 999px; margin-bottom: .8rem; }
+        .sv-spot h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin: 0 0 .75rem; line-height: 1.2; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .sv-spot p { color: rgba(255,255,255,.88); line-height: 1.65; margin: 0 0 1.5rem; font-size: .98rem; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
+        .sv-stats { display: flex; gap: 2.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,.15); }
+        .sv-stat b { display: block; font: 600 1.6rem 'Playfair Display', serif; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .sv-stat span { font-size: .85rem; color: var(--muted); }
+
+        /* Right Bottom: "Book More, Glow More!" Container with White Quote */
+        .sv-ascii {
+            position: relative; overflow: hidden; border-radius: 28px;
+            background: linear-gradient(135deg, rgba(30, 12, 22, 0.9) 0%, rgba(45, 18, 32, 0.95) 100%);
+            border: 1px solid rgba(238,134,171,0.35);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+            padding: 1.75rem;
+            display: flex; flex-direction: column; gap: 1.1rem;
+        }
+        .sv-ascii canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
+        .sv-ascii > * { position: relative; z-index: 3; }
+
+        .sv-promo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .sv-promo-body h4 { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #fff; margin: 0 0 0.4rem; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+        .sv-promo-quote { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.05rem; line-height: 1.4; color: #ffffff; margin: 0; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
+
+        .sv-promo-footer { display: flex; align-items: center; justify-content: flex-end; padding-top: 0.2rem; }
+        .sv-book-more-btn { font: 600 0.8rem 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em;
+                            background: linear-gradient(135deg, #df8ca9 0%, #e5a4be 100%); color: #150913;
+                            padding: 0.55rem 1.35rem; border-radius: 999px; text-decoration: none; white-space: nowrap;
+                            box-shadow: 0 0 20px rgba(223, 140, 169, 0.35); transition: all 0.2s ease; }
+        .sv-book-more-btn:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(223, 140, 169, 0.6); }
+
+        .sv-empty { display: none; text-align: center; padding: 2rem 0 1rem; color: var(--muted); }
+        .sv-src { display: none; }
+
+        @media (max-width: 960px) {
+            .sv-page { margin-left: 0 !important; padding: 1.25rem !important; }
+            .sv-layout { grid-template-columns: 1fr; }
+            .sv-side { position: static; order: -1; }
+            .sv-head h1 { font-size: 2.2rem; }
+        }
+
+        /* ===== Floating glass sidebar — scoped with nb- ===== */
+        .nb-sidebar {
+            position: fixed; z-index: 50; left: 1.25rem; top: 1.25rem; bottom: 1.25rem;
+            width: 5rem; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(160deg, rgba(21, 9, 19, 0.92) 0%, rgba(15, 6, 14, 0.96) 100%);
+            backdrop-filter: blur(26px) saturate(170%);
+            -webkit-backdrop-filter: blur(26px) saturate(170%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 1.75rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+            transition: width .35s cubic-bezier(.4,0,.2,1), box-shadow .35s ease, transform .3s ease;
+        }
+        .nb-sidebar:hover {
+            width: 18rem;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 60px rgba(223,140,169,0.20), 12px 16px 50px rgba(0,0,0,0.55);
+        }
+        .nb-top, .nb-bottom { padding: 1rem .75rem; }
+        .nb-bottom { border-top: 1px solid rgba(255,255,255,.1); }
+
+        .nb-brand { display: flex; align-items: center; gap: .75rem; padding-bottom: 1.5rem; margin: 0 .1rem;
+                    border-bottom: 1px solid rgba(255,255,255,.1); text-decoration: none; }
+        .nb-brand-icon { flex: none; font-size: 1.5rem; line-height: 1; color: #df8ca9; }
+        .nb-brand-text { font: 600 1.25rem 'Playfair Display', serif; letter-spacing: -.01em; color: #fff; white-space: nowrap; transition: color .2s, opacity .25s ease .05s, transform .3s ease .05s; }
+        .nb-brand:hover .nb-brand-text { color: #df8ca9; }
+
+        .nb-nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: .5rem; }
+        .nb-link { display: flex; align-items: center; gap: .75rem; padding: .75rem .85rem; border-radius: .75rem;
+                   font-size: .875rem; font-weight: 500; color: #d1d5db; text-decoration: none;
+                   transition: background .2s, color .2s; }
+        .nb-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+        .nb-link.nb-active { background: rgba(223,140,169,.18); color: #df8ca9; }
+        .nb-link svg { flex: none; width: 20px; height: 20px; }
+        .nb-link span { white-space: nowrap; transition: opacity .25s ease .05s, transform .3s ease .05s; }
+
+        .nb-logout { display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%;
+                     padding: .65rem 0; border-radius: 1rem; cursor: pointer;
+                     font: 400 .75rem 'JetBrains Mono', monospace; letter-spacing: .05em; text-transform: uppercase; color: #d1d5db;
+                     background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.15);
+                     backdrop-filter: blur(12px); transition: all .3s ease; }
+        .nb-logout:hover { color: #fff; background: rgba(255,255,255,.1); border-color: rgba(223,140,169,.5); }
+        .nb-logout svg { flex: none; width: 16px; height: 16px; }
+
+        .nb-toggle { display: none; }
+        .nb-overlay { display: none; }
+
+        @media (min-width: 1024px) {
+            .nb-brand-text, .nb-link span { opacity: 0; transform: translateX(-8px); }
+            .nb-sidebar:hover .nb-brand-text, .nb-sidebar:hover .nb-link span { opacity: 1; transform: translateX(0); }
+            .nb-logout span { display: none; }
+            .nb-sidebar:hover .nb-logout span { display: inline; }
+            .nb-sidebar:hover .nb-logout { padding-left: 1rem; padding-right: 1rem; }
+            .nb-sidebar:hover ~ .sv-page { margin-left: 20.5rem; }
+        }
+
+        @media (max-width: 1023px) {
+            .nb-sidebar { width: 18rem; transform: translateX(-120%); }
+            .nb-sidebar.nb-open { transform: translateX(0); }
+            .nb-link { border-radius: 1rem; }
+            .nb-logout { padding: .65rem 1rem; }
+            .nb-toggle { display: grid; place-items: center; position: fixed; z-index: 45; top: 1rem; left: 1rem;
+                         width: 44px; height: 44px; border-radius: 14px; cursor: pointer; color: #fff;
+                         background: rgba(21,9,19,.65); border: 1px solid rgba(255,255,255,.1);
+                         backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+            .nb-toggle svg { width: 24px; height: 24px; }
+            .nb-overlay { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.6);
+                          backdrop-filter: blur(4px); }
+            .nb-overlay.nb-show { display: block; }
+        }
+
+    </style>
+</head>
+<body class="dashboard-body">
+
+<div class="bg-photo"></div>
+<div class="bg-tint"></div>
+
+<button class="nb-toggle" id="nbToggle" type="button" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+<div class="nb-overlay" id="nbOverlay"></div>
+
+<div class="app-shell" style="display: flex; min-height: 100vh; position: relative; z-index: 10;">
+
+    <!-- Sidebar Navigation -->
+    <aside class="nb-sidebar" id="nbSidebar">
+        <div class="nb-top">
+            <a class="nb-brand" href="#">
+                <span class="nb-brand-icon">🌸</span>
+                <span class="nb-brand-text">Aurelia Salon</span>
+            </a>
+
+            <nav class="nb-nav">
+                <a class="nb-link" th:href="@{/customer/dashboard}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11.5L12 4l8 7.5M6 10v9h12v-9"/>
+                    </svg>
+                    <span>Overview</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/appointments}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="3" y="5" width="18" height="16" rx="2" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5h18M8 3v3M16 3v3"/>
+                    </svg>
+                    <span>Appointments</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/staff}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11a3.5 3.5 0 10-3.5-3.5M8.5 11a3 3 0 10-3-3M2.5 19c.6-2.6 2.9-4.3 6-4.3s5.4 1.7 6 4.3M13 14.9c2.6.2 4.6 1.8 5.1 4.1"/>
+                    </svg>
+                    <span>Staff</span>
+                </a>
+
+                <a class="nb-link nb-active" th:href="@{/customer/services}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4L12 3zM19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/>
+                    </svg>
+                    <span>Services</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/products}" href="#">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 7h12l1 13H5L6 7z"/>
+                        <path d="M9 7a3 3 0 0 1 6 0"/>
+                    </svg>
+                    <span>Products</span>
+                </a>
+
+                <a class="nb-link" th:href="@{/customer/profile}" href="#">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="12" cy="8" r="3.4" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5"/>
+                    </svg>
+                    <span>Profile</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="nb-bottom">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nb-logout">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    <span>Log Out</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content sv-page">
+
+        <header class="sv-head">
+            <h1>Our services</h1>
+            <p>Browse the menu and tap a treatment to see the details.</p>
+        </header>
+
+        <div class="sv-toolbar">
+            <div class="sv-chips" id="svChips" role="group" aria-label="Filter by category"></div>
+            <input class="sv-search" id="svSearch" type="search" placeholder="Search treatments" aria-label="Search treatments">
+        </div>
+
+        <div class="sv-layout">
+            <section class="sv-menu" id="svMenu" aria-label="Treatment menu">
+                <div class="sv-empty" id="svEmpty" th:attr="data-none=${services == null or #lists.isEmpty(services)}">No treatments match your search.</div>
+            </section>
+
+            <div class="sv-side">
+                <!-- Right Top: Treatment Spotlight Card -->
+                <aside class="sv-spot" id="svSpot" aria-live="polite">
+                    <canvas id="spotCanvas"></canvas>
+                    <span class="sv-tag" id="spCat">Category</span>
+                    <h3 id="spName">Select a treatment</h3>
+                    <p id="spDesc"></p>
+                    <div class="sv-stats">
+                        <div class="sv-stat"><b id="spDur">-</b><span>Duration</span></div>
+                        <div class="sv-stat"><b id="spPrice">-</b><span>Price</span></div>
+                    </div>
+                </aside>
+
+                <!-- Right Bottom: "Book More, Glow More!" Container with Selected White Quote -->
+                <div class="sv-ascii" id="svAscii">
+                    <canvas id="salonAsciiCanvas"></canvas>
+                    <div class="sv-promo-header">
+                        <div class="sv-promo-body">
+                            <h4>Book More, Glow More!</h4>
+                            <p class="sv-promo-quote">“Invest in your skin and hair, they are a representation of your daily self-love.”</p>
+                        </div>
+                        <span style="font-size: 1.25rem;">🌸</span>
+                    </div>
+                    <div class="sv-promo-footer">
+                        <a th:href="@{/customer/appointments/book}" href="/customer/appointments/book" class="sv-book-more-btn">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data source: the services table, passed in by the controller as "services" -->
+        <ul class="sv-src" id="svSource">
+            <li th:each="srv : ${services}"
+                th:attr="data-id=${srv.id},
+                         data-name=${srv.name},
+                         data-category=${#strings.isEmpty(srv.category) ? 'Other' : srv.category},
+                         data-price=${srv.price},
+                         data-duration=${srv.durationMinutes},
+                         data-desc=${srv.description}"></li>
+        </ul>
+    </main>
+</div>
+
+<script>
+    // Mobile menu toggle
+    (function () {
+        var sb = document.getElementById('nbSidebar'), ov = document.getElementById('nbOverlay'),
+            tg = document.getElementById('nbToggle');
+        function toggle() { sb.classList.toggle('nb-open'); ov.classList.toggle('nb-show'); }
+        tg.addEventListener('click', toggle);
+        ov.addEventListener('click', toggle);
+    })();
+</script>
+
+<script>
+    (function () {
+        var items = Array.prototype.map.call(document.querySelectorAll('#svSource li'), function (li) {
+            var d = li.dataset;
+            return { id: d.id, name: d.name, cat: d.category || 'Other', price: d.price, dur: d.duration, desc: d.desc };
+        });
+        var menu = document.getElementById('svMenu'), chips = document.getElementById('svChips'),
+            search = document.getElementById('svSearch'), empty = document.getElementById('svEmpty');
+        var active = 'All', selected = items[0] || null, buttons = [];
+
+        var money = function (p) { return p ? '$' + p : 'Ask in salon'; };
+        var mins  = function (m) { return m ? m + ' min' : '-'; };
+
+        // Category chips
+        var cats = ['All'];
+        items.forEach(function (i) { if (cats.indexOf(i.cat) < 0) cats.push(i.cat); });
+        if (cats.length <= 2) { chips.style.display = 'none'; }
+        cats.forEach(function (c) {
+            var b = document.createElement('button');
+            b.type = 'button'; b.className = 'sv-chip'; b.textContent = c;
+            b.addEventListener('click', function () { active = c; render(); });
+            chips.appendChild(b);
+        });
+
+        function show(i) {
+            selected = i;
+            document.getElementById('spCat').textContent = i.cat;
+            document.getElementById('spName').textContent = i.name;
+            document.getElementById('spDesc').textContent = i.desc || 'Ask our team for more about this treatment.';
+            document.getElementById('spDur').textContent = mins(i.dur);
+            document.getElementById('spPrice').textContent = money(i.price);
+            buttons.forEach(function (b) { b.el.setAttribute('aria-pressed', b.item === i ? 'true' : 'false'); });
+        }
+
+        function render() {
+            var q = search.value.trim().toLowerCase();
+            var list = items.filter(function (i) {
+                return (active === 'All' || i.cat === active) &&
+                       (!q || (i.name + ' ' + (i.desc || '') + ' ' + i.cat).toLowerCase().indexOf(q) >= 0);
+            });
+            Array.prototype.forEach.call(chips.children, function (b) {
+                b.setAttribute('aria-pressed', b.textContent === active ? 'true' : 'false');
+            });
+            Array.prototype.slice.call(menu.querySelectorAll('.sv-group')).forEach(function (g) { g.remove(); });
+            buttons = [];
+            empty.textContent = items.length ? 'No treatments match your search.' : 'No services have been added yet.';
+            empty.style.display = list.length ? 'none' : 'block';
+
+            var groups = {};
+            list.forEach(function (i) { (groups[i.cat] = groups[i.cat] || []).push(i); });
+            Object.keys(groups).forEach(function (c) {
+                var g = document.createElement('div'); g.className = 'sv-group';
+                var h = document.createElement('h2'); h.textContent = c; g.appendChild(h);
+                groups[c].forEach(function (i) {
+                    var b = document.createElement('button');
+                    b.type = 'button'; b.className = 'sv-item';
+                    var line = document.createElement('div'); line.className = 'sv-line';
+                    var name = document.createElement('span'); name.className = 'sv-name'; name.textContent = i.name;
+                    var dots = document.createElement('span'); dots.className = 'sv-dots';
+                    var price = document.createElement('span'); price.className = 'sv-price'; price.textContent = money(i.price);
+                    line.appendChild(name); line.appendChild(dots); line.appendChild(price);
+                    b.appendChild(line);
+                    if (i.dur) {
+                        var sub = document.createElement('div'); sub.className = 'sv-sub'; sub.textContent = mins(i.dur);
+                        b.appendChild(sub);
+                    }
+                    b.addEventListener('click', function () { show(i); });
+                    g.appendChild(b);
+                    buttons.push({ item: i, el: b });
+                });
+                menu.appendChild(g);
+            });
+            if (list.length && (!selected || list.indexOf(selected) < 0)) { show(list[0]); }
+        }
+
+        search.addEventListener('input', render);
+        render();
+    })();
+</script>
+
+<!-- Bokeh Orbs Animation for Spotlight Card -->
+<script>
+    (function () {
+        var box = document.getElementById('svSpot');
+        var canvas = document.getElementById('spotCanvas');
+        if (!box || !canvas) return;
+        var ctx = canvas.getContext('2d', { alpha: false });
+        var width, height, orbs = [], mouseX = -1000, mouseY = -1000;
+
+        function resize() {
+            width = box.clientWidth; height = box.clientHeight;
+            canvas.width = width; canvas.height = height;
+            orbs = [];
+            for (let i = 0; i < 12; i++) {
+                orbs.push({
+                    x: Math.random() * width, y: Math.random() * height,
+                    radius: Math.random() * 22 + 8,
+                    vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+                    color: Math.random() > 0.3 ? 'rgba(238, 134, 171, ' : 'rgba(255, 215, 0, ',
+                    alpha: Math.random() * 0.35 + 0.15
+                });
+            }
+        }
+        window.addEventListener('resize', resize); resize();
+
+        box.addEventListener('mousemove', function (e) {
+            var r = box.getBoundingClientRect();
+            mouseX = e.clientX - r.left; mouseY = e.clientY - r.top;
+        });
+        box.addEventListener('mouseleave', function () { mouseX = -1000; mouseY = -1000; });
+
+        function draw() {
+            ctx.fillStyle = '#230f19'; ctx.fillRect(0, 0, width, height);
+            for (let i = 0; i < orbs.length; i++) {
+                let o = orbs[i];
+                o.x += o.vx; o.y += o.vy;
+                if (o.x - o.radius < 0 || o.x + o.radius > width) o.vx *= -1;
+                if (o.y - o.radius < 0 || o.y + o.radius > height) o.vy *= -1;
+                let dist = Math.hypot(o.x - mouseX, o.y - mouseY);
+                if (dist < 90) {
+                    let angle = Math.atan2(o.y - mouseY, o.x - mouseX);
+                    o.x += Math.cos(angle) * 1.5; o.y += Math.sin(angle) * 1.5;
+                }
+                ctx.beginPath(); ctx.arc(o.x, o.y, o.radius, 0, Math.PI * 2);
+                ctx.fillStyle = o.color + o.alpha + ')';
+                ctx.shadowColor = '#ee86ab'; ctx.shadowBlur = 12; ctx.fill();
+            }
+            requestAnimationFrame(draw);
+        }
+        requestAnimationFrame(draw);
+    })();
+</script>
+
+<!-- Bokeh Orbs Animation for Book More Promo Container -->
+<script>
+    (function () {
+        var box = document.getElementById('svAscii');
+        var canvas = document.getElementById('salonAsciiCanvas');
+        if (!box || !canvas) return;
+        var ctx = canvas.getContext('2d', { alpha: false });
+        var width, height, orbs = [], mouseX = -1000, mouseY = -1000;
+
+        function resize() {
+            width = box.clientWidth; height = box.clientHeight;
+            canvas.width = width; canvas.height = height;
+            orbs = [];
+            for (let i = 0; i < 10; i++) {
+                orbs.push({
+                    x: Math.random() * width, y: Math.random() * height,
+                    radius: Math.random() * 20 + 6,
+                    vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+                    color: Math.random() > 0.3 ? 'rgba(238, 134, 171, ' : 'rgba(255, 215, 0, ',
+                    alpha: Math.random() * 0.35 + 0.15
+                });
+            }
+        }
+        window.addEventListener('resize', resize); resize();
+
+        box.addEventListener('mousemove', function (e) {
+            var r = box.getBoundingClientRect();
+            mouseX = e.clientX - r.left; mouseY = e.clientY - r.top;
+        });
+        box.addEventListener('mouseleave', function () { mouseX = -1000; mouseY = -1000; });
+
+        function draw() {
+            ctx.fillStyle = '#1e0c16'; ctx.fillRect(0, 0, width, height);
+            for (let i = 0; i < orbs.length; i++) {
+                let o = orbs[i];
+                o.x += o.vx; o.y += o.vy;
+                if (o.x - o.radius < 0 || o.x + o.radius > width) o.vx *= -1;
+                if (o.y - o.radius < 0 || o.y + o.radius > height) o.vy *= -1;
+                let dist = Math.hypot(o.x - mouseX, o.y - mouseY);
+                if (dist < 80) {
+                    let angle = Math.atan2(o.y - mouseY, o.x - mouseX);
+                    o.x += Math.cos(angle) * 1.2; o.y += Math.sin(angle) * 1.2;
+                }
+                ctx.beginPath(); ctx.arc(o.x, o.y, o.radius, 0, Math.PI * 2);
+                ctx.fillStyle = o.color + o.alpha + ')';
+                ctx.shadowColor = '#ee86ab'; ctx.shadowBlur = 10; ctx.fill();
+            }
+            requestAnimationFrame(draw);
+        }
+        requestAnimationFrame(draw);
+    })();
+</script>
+
+</body>
+</html>

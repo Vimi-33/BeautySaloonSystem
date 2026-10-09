@@ -3,6 +3,7 @@ package com.WD09.BeautySaloonSystem.contoller;
 import com.WD09.BeautySaloonSystem.dto.AppointmentForm;
 import com.WD09.BeautySaloonSystem.entities.Appointment;
 import com.WD09.BeautySaloonSystem.service.AppointmentService;
+import com.WD09.BeautySaloonSystem.service.ServiceCatalogService;
 import com.WD09.BeautySaloonSystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,11 +18,15 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
     private final UserService userService;
+    private final ServiceCatalogService serviceCatalogService;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService, UserService userService) {
+    public AppointmentController(AppointmentService appointmentService,
+                                 UserService userService,
+                                 ServiceCatalogService serviceCatalogService) {
         this.appointmentService = appointmentService;
         this.userService = userService;
+        this.serviceCatalogService = serviceCatalogService;
     }
 
     // Customer Views Personal Bookings: GET /customer/appointments
@@ -36,6 +41,8 @@ public class AppointmentController {
     @GetMapping("/customer/appointments/book")
     public String showBookingForm(Model model) {
         model.addAttribute("appointmentForm", new AppointmentForm());
+        // Fills the treatment dropdown from the admin Service Catalog
+        model.addAttribute("services", serviceCatalogService.getAllServices());
         return "customer/book-appointment";
     }
 
