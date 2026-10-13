@@ -5,7 +5,7 @@ spring:
     url: jdbc:mysql://localhost:3306/SaloonManagement?createDatabaseIfNotExist=true
 
     username: root
-    password: YOUR PASSWORD
+    password: Vimi#2006
 
 
   jpa:
