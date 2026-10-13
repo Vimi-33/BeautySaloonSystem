@@ -29,7 +29,7 @@
                 <i class="bi bi-heart-fill"></i>
             </div>
             <div class="brand-text">
-                <h1>Aurelia</h1>
+                <h1>Velvet & Rose</h1>
                 <span>Beauty Salon</span>
             </div>
         </div>
@@ -37,35 +37,28 @@
         <div class="sidebar-divider"></div>
 
         <nav class="sidebar-nav">
-            <a th:href="@{/admin/dashboard(view='customers')}"
-               class="side-link"
-               th:classappend="${currentView == null or currentView == 'customers' ? 'active' : ''}">
-                <i class="bi bi-people-fill"></i>
-                <span>Customers</span>
+
+            <a th:href="@{/admin/dashboard(view='customers')}" class="side-link ">
+                <i class="bi bi-people-fill"></i><span>Customers</span>
             </a>
 
-            <a th:href="@{/admin/dashboard(view='appointments')}"
-               class="side-link"
-               th:classappend="${currentView == 'appointments' ? 'active' : ''}">
-                <i class="bi bi-calendar-heart"></i>
-                <span>Appointments</span>
+            <a th:href="@{/admin/dashboard(view='appointments')}" class="side-link"
+               th:classappend="${currentView == 'appointments'} ? 'active'">
+                <i class="bi bi-calendar-heart"></i><span>Appointments</span>
             </a>
 
             <a th:href="@{/admin/staff}" class="side-link">
-                <i class="bi bi-person-badge-fill"></i>
-                <span>Staff</span>
+                <i class="bi bi-person-badge-fill"></i><span>Staff</span>
             </a>
-
             <a th:href="@{/admin/services}" class="side-link">
-                <i class="bi bi-scissors"></i>
-                <span>Services</span>
+                <i class="bi bi-scissors"></i><span>Services</span>
             </a>
-
             <a th:href="@{/admin/products}" class="side-link">
-                <i class="bi bi-scissors"></i>
-                <span>Products</span>
+                <i class="bi bi-box-seam-fill"></i><span>Products</span>
             </a>
-
+            <a th:href="@{/admin/all-feedbacks}" class="side-link ">
+                <i class="bi bi-chat-heart-fill"></i><span>Feedbacks</span>
+            </a>
 
         </nav>
 
@@ -164,21 +157,23 @@
                         <span class="stat-label">QUICK ACCESS</span>
                     </div>
                     <div class="quick-actions">
-                        <a th:href="@{/admin/dashboard(view='customers')}" class="quick-action">
-                            <i class="bi bi-people-fill"></i> Customers
+                        <a th:href="@{/admin/dashboard(view='customers')}" class="side-link active">
+                            <i class="bi bi-people-fill"></i><span>Customers</span>
                         </a>
-                        <a th:href="@{/admin/dashboard(view='appointments')}" class="quick-action">
-                            <i class="bi bi-calendar-heart"></i> Appointments
+                        <a th:href="@{/admin/dashboard(view='appointments')}" class="side-link">
+                            <i class="bi bi-calendar-heart"></i><span>Appointments</span>
                         </a>
-                        <a th:href="@{/admin/staff}" class="quick-action">
-                            <i class="bi bi-person-badge-fill"></i> Staff
+                        <a th:href="@{/admin/staff}" class="side-link">
+                            <i class="bi bi-person-badge-fill"></i><span>Staff</span>
                         </a>
-                        <a th:href="@{/admin/services}" class="quick-action">
-                            <i class="bi bi-scissors"></i> Services
+                        <a th:href="@{/admin/services}" class="side-link">
+                            <i class="bi bi-scissors"></i><span>Services</span>
                         </a>
-                        <!-- NEW: Products -->
-                        <a th:href="@{/admin/products}" class="quick-action">
-                            <i class="bi bi-box-seam-fill"></i> Products
+                        <a th:href="@{/admin/products}" class="side-link">
+                            <i class="bi bi-box-seam-fill"></i><span>Products</span>
+                        </a>
+                        <a th:href="@{/admin/all-feedbacks}" class="side-link">
+                            <i class="bi bi-chat-heart-fill"></i><span>Feedbacks</span>
                         </a>
                     </div>
                 </div>
