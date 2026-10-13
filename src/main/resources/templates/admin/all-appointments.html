@@ -13,10 +13,75 @@
 </head>
 <body>
 
+<div class="background-glow glow-one"></div>
+<div class="background-glow glow-two"></div>
+<div class="background-glow glow-three"></div>
+
 <div class="dashboard-wrapper">
 
+    <!-- SIDE MENU -->
+    <aside class="sidebar glass-panel">
+
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-heart-fill"></i>
+            </div>
+            <div class="brand-text">
+                <h1>Velvet & Rose</h1>
+                <span>Beauty Salon</span>
+            </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/dashboard(view='customers')}" class="side-link"
+               th:classappend="${currentView == null or currentView == 'customers'} ? 'active'">
+                <i class="bi bi-people-fill"></i><span>Customers</span>
+            </a>
+            <a th:href="@{/admin/staff}" class="side-link">
+                <i class="bi bi-person-badge-fill"></i><span>Staff</span>
+            </a>
+            <a th:href="@{/admin/dashboard(view='customers')}" class="side-link ">
+                <i class="bi bi-people-fill"></i><span>Customers</span>
+            </a>
+            <a th:href="@{/admin/dashboard(view='appointments')}" class="side-link">
+                <i class="bi bi-calendar-heart"></i><span>Appointments</span>
+            </a>
+            <a th:href="@{/admin/services}" class="side-link">
+                <i class="bi bi-scissors"></i><span>Services</span>
+            </a>
+            <a th:href="@{/admin/products}" class="side-link">
+                <i class="bi bi-box-seam-fill"></i><span>Products</span>
+            </a>
+            <a th:href="@{/admin/all-feedbacks}" class="side-link">
+                <i class="bi bi-chat-heart-fill"></i><span>Feedbacks</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="admin-mini">
+                <div class="admin-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="admin-details">
+                    <strong th:text="${admin != null ? admin.fullName : 'Admin'}">Admin</strong>
+                    <span th:text="${admin != null ? admin.department : 'Management'}">Management</span>
+                </div>
+            </div>
+
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
     <!-- MAIN AREA -->
-    <div class="dashboard-main" style="padding: 2rem;">
+    <div class="dashboard-main">
 
         <!-- TOP BAR -->
         <header class="topbar glass-panel">
@@ -29,79 +94,86 @@
             </a>
         </header>
 
-        <!-- ALERTS -->
-        <div th:if="${successMessage}" class="custom-alert success-alert" style="margin-top: 1rem;">
-            <div class="alert-icon"><i class="bi bi-check-lg"></i></div>
-            <span th:text="${successMessage}"></span>
-        </div>
+        <main class="main-content">
 
-        <!-- APPOINTMENTS TABLE -->
-        <section class="customer-section glass-panel" style="margin-top: 1.5rem;">
-            <div class="section-header">
-                <div class="section-title">
-                    <div class="section-icon"><i class="bi bi-calendar-heart"></i></div>
-                    <div>
-                        <h3>All Customer Bookings</h3>
-                        <p>Review and accept incoming appointments</p>
+            <!-- ALERTS -->
+            <div th:if="${successMessage}" class="custom-alert success-alert">
+                <div class="alert-icon"><i class="bi bi-check-lg"></i></div>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+
+            <!-- APPOINTMENTS TABLE -->
+            <section class="customer-section glass-panel">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-icon"><i class="bi bi-calendar-heart"></i></div>
+                        <div>
+                            <h3>All Customer Bookings</h3>
+                            <p>Review and accept incoming appointments</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="table-container">
-                <table class="customer-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Service</th>
-                        <th>Date & Time</th>
-                        <th>Type</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th class="actions-heading">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="app : ${appointments}">
-                        <td>
-                            <span class="customer-id" th:text="${'#' + app.id}">#1</span>
-                        </td>
-                        <td th:text="${app.serviceName}">Haircut</td>
-                        <td th:text="${#temporals.format(app.appointmentDateTime, 'yyyy-MM-dd HH:mm')}">2026-09-17 10:00</td>
-                        <td th:text="${app.appointmentType}">STANDARD</td>
-                        <td th:text="${'$' + app.price}">$50.00</td>
-                        <td>
-                            <span class="points-badge" th:text="${app.status}">PENDING</span>
-                        </td>
-                        <td class="actions-cell">
-                            <!-- ACCEPT BUTTON -->
-                            <form th:if="${app.status != 'ACCEPTED'}"
-                                  th:action="@{/admin/appointments/accept/{id}(id=${app.id})}"
-                                  method="post"
-                                  style="display:inline;">
-                                <button type="submit" class="save-tier-btn" style="padding: 0.4rem 0.8rem; width: auto;" title="Accept Appointment">
-                                    <i class="bi bi-check-lg"></i> Accept
-                                </button>
-                            </form>
-                            <span th:if="${app.status == 'ACCEPTED'}" style="color: #4CAF50; font-weight: 600;">
+                <div class="table-container">
+                    <table class="customer-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Service</th>
+                            <th>Date &amp; Time</th>
+                            <th>Type</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th class="actions-heading">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="app : ${appointments}">
+                            <td>
+                                <span class="customer-id" th:text="${'#' + app.id}">#1</span>
+                            </td>
+                            <td th:text="${app.serviceName}">Haircut</td>
+                            <td th:text="${#temporals.format(app.appointmentDateTime, 'yyyy-MM-dd HH:mm')}">2026-09-17 10:00</td>
+                            <td th:text="${app.appointmentType}">STANDARD</td>
+                            <td th:text="${'$' + app.price}">$50.00</td>
+                            <td>
+                                <span class="points-badge" th:text="${app.status}">PENDING</span>
+                            </td>
+                            <td class="actions-cell">
+                                <!-- ACCEPT BUTTON -->
+                                <form th:if="${app.status != 'ACCEPTED'}"
+                                      th:action="@{/admin/appointments/accept/{id}(id=${app.id})}"
+                                      method="post"
+                                      style="display:inline;">
+                                    <button type="submit" class="save-tier-btn" style="padding: 0.4rem 0.8rem; width: auto;" title="Accept Appointment">
+                                        <i class="bi bi-check-lg"></i> Accept
+                                    </button>
+                                </form>
+                                <span th:if="${app.status == 'ACCEPTED'}" style="color: #4CAF50; font-weight: 600;">
                                     <i class="bi bi-check-circle-fill"></i> Accepted
                                 </span>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
 
-                    <!-- EMPTY STATE -->
-                    <tr th:if="${#lists.isEmpty(appointments)}">
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <div class="empty-icon"><i class="bi bi-calendar-x"></i></div>
-                                <h4>No appointments found</h4>
-                                <p>There are currently no bookings in the system.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                        <!-- EMPTY STATE -->
+                        <tr th:if="${#lists.isEmpty(appointments)}">
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i class="bi bi-calendar-x"></i></div>
+                                    <h4>No appointments found</h4>
+                                    <p>There are currently no bookings in the system.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
 
     </div>
 </div>
