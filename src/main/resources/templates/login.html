@@ -8,12 +8,157 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* ---------- Photo as page background (uses your /salon-bg.png) ---------- */
+        .backdrop::before{
+          content:"";
+          position:absolute;
+          inset:-24px;
+          background:url('/salon-bg.png') center/cover no-repeat;
+          filter:blur(10px) saturate(1.05);
+          opacity:.42;
+        }
+        .backdrop::after{
+          content:"";
+          position:absolute;
+          inset:0;
+          background:linear-gradient(135deg,rgba(18,13,22,.74),rgba(58,32,50,.46) 55%,rgba(16,10,18,.78));
+        }
+        .blob{ z-index:1; }
+
+        /* ---------- Stage: card + mascot cluster ---------- */
+        .stage{
+          position:relative;
+          width:100%;
+          max-width:900px;
+          margin-bottom:60px;
+        }
+        .stage .auth-card{ width:100%; }
+
+        /* all four mascots huddle together at the bottom-right corner */
+        .mascot-cluster{
+          position:absolute;
+          right:-12px;
+          bottom:-70px;
+          width:220px;
+          height:170px;
+          z-index:6;
+          pointer-events:none;
+          transform-origin:100% 100%;
+        }
+        .mascot-cluster .mascot{ pointer-events:auto; }
+
+        /* ---------- Mascots ---------- */
+        /* two mascots leaning away from each other (uses the separate "rotate" property so it
+           doesn't clash with the pop / bob animations) */
+        .mascot--polish{ width:90px; right:72px; bottom:8px; rotate:-12deg; transform-origin:50% 100%; }
+        .mascot--lipstick{ width:82px; right:0; bottom:-2px; rotate:10deg; transform-origin:50% 100%; }
+
+        .mascot{
+          position:absolute;
+          z-index:6;
+          width:112px;
+          cursor:pointer;
+          animation:mascot-pop .9s cubic-bezier(.34,1.4,.64,1) both;
+          animation-delay:calc(.5s + var(--i,0) * .22s);
+        }
+        @keyframes mascot-pop{
+          from{ opacity:0; transform:translateY(60px) scale(.2) rotate(-14deg); }
+          60%{ opacity:1; transform:translateY(-10px) scale(1.08) rotate(4deg); }
+          to{ opacity:1; transform:none; }
+        }
+
+        .mascot__float{
+          animation:mascot-bob var(--dur,4.4s) ease-in-out infinite;
+          animation-delay:calc(var(--i,0) * -.7s);
+        }
+        @keyframes mascot-bob{ 50%{ transform:translateY(-9px) rotate(var(--tilt,2deg)); } }
+
+        .mascot svg{
+          display:block;
+          width:100%;
+          height:auto;
+          overflow:visible;
+          transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+        }
+        .mascot:hover svg{ transform:scale(1.08) rotate(-3deg); }
+        .mascot.is-jump svg{ animation:mascot-jump .6s cubic-bezier(.34,1.2,.64,1); }
+        @keyframes mascot-jump{
+          30%{ transform:translateY(-22px) scale(.94,1.08); }
+          60%{ transform:translateY(0) scale(1.08,.92); }
+          to{ transform:none; }
+        }
+
+        .mascot__shadow{
+          display:block;
+          width:70%;
+          height:14px;
+          margin:6px auto 0;
+          border-radius:50%;
+          background:radial-gradient(ellipse at center,rgba(0,0,0,.5) 0%,rgba(0,0,0,0) 70%);
+          animation:mascot-shadow var(--dur,4.4s) ease-in-out infinite;
+          animation-delay:calc(var(--i,0) * -.7s);
+        }
+        @keyframes mascot-shadow{ 50%{ transform:scale(.78); opacity:.55; } }
+
+        /* Eyes */
+        .eye{
+          transform-box:fill-box;
+          transform-origin:center;
+          animation:mascot-blink 5.5s infinite;
+          animation-delay:var(--d,0s);
+          transition:transform .2s;
+        }
+        @keyframes mascot-blink{ 0%,93%,100%{ transform:scaleY(1); } 96%{ transform:scaleY(.08); } }
+        .pupil{ transform:translate(var(--px,0px),var(--py,0px)); transition:transform .12s ease-out; }
+        .cheek{ opacity:.55; transition:opacity .3s; }
+
+        /* Shy: eyes close while typing the password */
+        .is-shy .eye{ animation:none; transform:scaleY(.08); }
+        .is-shy .cheek{ opacity:1; }
+
+        /* Sparkles on click */
+        .sparkle{
+          position:absolute;
+          left:50%;
+          top:40%;
+          width:14px;
+          height:14px;
+          pointer-events:none;
+          background:var(--gold-soft);
+          clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
+          animation:sparkle .75s ease-out forwards;
+        }
+        @keyframes sparkle{
+          from{ opacity:1; transform:translate(-50%,-50%) scale(.4); }
+          to{ opacity:0; transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.3) rotate(120deg); }
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width:900px){
+          .mascot-cluster{ transform:scale(.82); }
+        }
+        @media (max-width:760px){
+          .stage{ margin-bottom:56px; }
+          .mascot-cluster{ right:6px; bottom:-52px; transform:scale(.6); }
+        }
+        @media (max-width:480px){
+          .mascot-cluster{ transform:scale(.52); }
+        }
+        /* ---------- Performance ---------- */
+        .mascot,
+        .mascot__float{ will-change:transform; }
+        .backdrop::before{ filter:blur(6px) saturate(1.05); transform:translateZ(0); }
+        .blob{ filter:blur(50px); }
+        .auth-card{ backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+        .overlay-glass{ backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+    </style>
 </head>
 <body>
 
 <div class="backdrop">
     <div class="blob blob--gold"></div>
-    <div class="blob blob--teal"></div>
+    <div class="blob blob--rose"></div>
 </div>
 
 <div class="page">
@@ -33,47 +178,191 @@
             <path d="M12 7.2C12 4.5 10.2 3 8 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
             <path d="M12 7.2C12 4.5 13.8 3 16 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
         </svg>
-        Velvet & Rose Salon
+        Velvet &amp; Rose Salon
     </div>
 
-    <div class="auth-card">
+    <div class="stage">
 
-        <!-- FORM (left) -->
-        <div class="panel-form">
-            <form class="form" th:action="@{/login}" method="post">
-                <h2>Log in</h2>
+        <!-- AUTH CARD -->
+        <div class="auth-card">
 
-                <div th:if="${param.error}" class="alert alert--error" role="alert">
-                    Invalid email or password.
+            <!-- FORM (left) -->
+            <div class="panel-form">
+                <form class="form" th:action="@{/login}" method="post">
+                    <h2>Log in</h2>
+
+                    <div th:if="${param.error}" class="alert alert--error" role="alert">
+                        Invalid email or password.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert--info" role="alert">
+                        You have been logged out successfully.
+                    </div>
+                    <div th:if="${param.registered}" class="alert alert--success" role="alert">
+                        Account created successfully! Please log in.
+                    </div>
+
+                    <input class="field" type="email" name="username" placeholder="Email" aria-label="Email" autocomplete="username" required>
+                    <input class="field" type="password" name="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+
+                    <button class="btn-primary" type="submit">Log in</button>
+
+                    <p class="mobile-switch">New here?
+                        <button type="button" class="nav-trigger" th:attr="data-href=@{/register}" data-exit="left">Create account</button>
+                    </p>
+                </form>
+            </div>
+
+            <!-- IMAGE (right) -->
+            <div class="panel-image">
+                <div class="overlay-glass">
+                    <h2>New to Velvet &amp; Rose?</h2>
+                    <p>Create an account to book appointments, save your favorite stylists, and get member perks.</p>
+                    <button type="button" class="btn-ghost nav-trigger" th:attr="data-href=@{/register}" data-exit="left">Create account</button>
                 </div>
-                <div th:if="${param.logout}" class="alert alert--info" role="alert">
-                    You have been logged out successfully.
-                </div>
-                <div th:if="${param.registered}" class="alert alert--success" role="alert">
-                    Account created successfully! Please log in.
-                </div>
+            </div>
 
-                <input class="field" type="email" name="username" placeholder="Email" aria-label="Email" required>
-                <input class="field" type="password" name="password" placeholder="Password" aria-label="Password" required>
-
-                <button class="btn-primary" type="submit">Log in</button>
-
-
-            </form>
         </div>
 
-        <!-- IMAGE (right) -->
-        <div class="panel-image">
-            <div class="overlay-glass">
-                <h2>New to Aurelia?</h2>
-                <p>Create an account to book appointments, save your favorite stylists, and get member perks.</p>
-                <button type="button" class="btn-ghost nav-trigger" th:attr="data-href=@{/register}" data-exit="left">Create account</button>
+        <!-- MASCOT CLUSTER (bottom-right corner of the card) -->
+        <div class="mascot-cluster" aria-hidden="true">
+
+
+            <div class="mascot mascot--polish" style="--i:0; --dur:4.4s; --tilt:2deg">
+                <div class="mascot__float">
+                    <svg viewBox="0 0 120 170" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="44" y="4" width="32" height="46" rx="9" fill="#2b1a24"/>
+                        <path d="M52 12v30M60 12v30M68 12v30" stroke="#fff" stroke-opacity=".14" stroke-width="2" stroke-linecap="round"/>
+                        <rect x="50" y="48" width="20" height="12" rx="3" fill="#d8b27a"/>
+                        <rect x="16" y="58" width="88" height="106" rx="28" fill="#e5718a"/>
+                        <rect x="27" y="72" width="8" height="56" rx="4" fill="#fff" opacity=".28"/>
+                        <g transform="translate(45 104)"><g class="eye" style="--d:.4s"><ellipse rx="9" ry="10.5" fill="#fff"/><g class="pupil"><circle r="5" fill="#2b1a24"/><circle cx="1.8" cy="-2" r="1.6" fill="#fff"/></g></g></g>
+                        <g transform="translate(75 104)"><g class="eye" style="--d:.4s"><ellipse rx="9" ry="10.5" fill="#fff"/><g class="pupil"><circle r="5" fill="#2b1a24"/><circle cx="1.8" cy="-2" r="1.6" fill="#fff"/></g></g></g>
+                        <path d="M52 124q8 8 16 0" fill="none" stroke="#2b1a24" stroke-width="2.6" stroke-linecap="round"/>
+                        <circle class="cheek" cx="33" cy="120" r="6" fill="#ff9fb0"/>
+                        <circle class="cheek" cx="87" cy="120" r="6" fill="#ff9fb0"/>
+                    </svg>
+                </div>
+                <span class="mascot__shadow"></span>
             </div>
+
+            <div class="mascot mascot--lipstick" style="--i:2; --dur:4.8s; --tilt:2deg">
+                <div class="mascot__float">
+                    <svg viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30 58V28Q30 12 42 8L66 20Q70 23 70 30V58Z" fill="#c2284b"/>
+                        <path d="M36 54V30Q36 20 42 16" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="3" stroke-linecap="round"/>
+                        <rect x="26" y="54" width="48" height="22" rx="5" fill="#d8b27a"/>
+                        <rect x="20" y="74" width="60" height="88" rx="14" fill="#3a1b2c"/>
+                        <g transform="translate(40 112)"><g class="eye" style="--d:2.4s"><ellipse rx="7.5" ry="9" fill="#fff"/><g class="pupil"><circle r="4.2" fill="#2b1a24"/><circle cx="1.5" cy="-1.7" r="1.4" fill="#fff"/></g></g></g>
+                        <g transform="translate(60 112)"><g class="eye" style="--d:2.4s"><ellipse rx="7.5" ry="9" fill="#fff"/><g class="pupil"><circle r="4.2" fill="#2b1a24"/><circle cx="1.5" cy="-1.7" r="1.4" fill="#fff"/></g></g></g>
+                        <path d="M43 128q7 7 14 0" fill="none" stroke="#f6d9de" stroke-width="2.4" stroke-linecap="round"/>
+                        <circle class="cheek" cx="30" cy="126" r="5" fill="#e5718a"/>
+                        <circle class="cheek" cx="70" cy="126" r="5" fill="#e5718a"/>
+                    </svg>
+                </div>
+                <span class="mascot__shadow"></span>
+            </div>
+
+
         </div>
 
     </div>
 </div>
 
 <script th:src="@{/script.js}"></script>
+<script>
+    (function () {
+        var body = document.body;
+        var mascots = [].slice.call(document.querySelectorAll('.mascot'));
+        var pupils = [].slice.call(document.querySelectorAll('.pupil'));
+        var email = document.querySelector('input[name="username"]');
+        var pass = document.querySelector('input[name="password"]');
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var target = null;
+        var raf = null;
+        var shy = false;
+
+        /* ---------- Eyes follow the cursor / the email field ---------- */
+        function look(x, y) {
+            target = { x: x, y: y };
+            if (!raf) raf = requestAnimationFrame(update);
+        }
+
+        /* eye centres are measured once (and on resize / after the pop-in),
+           not on every mouse move, so tracking never forces a layout */
+        var centers = [];
+        function measure() {
+            centers = pupils.map(function (p) {
+                var r = p.parentNode.getBoundingClientRect();
+                return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+            });
+        }
+
+        function update() {
+            raf = null;
+            if (!target) return;
+            for (var i = 0; i < pupils.length; i++) {
+                var c = centers[i];
+                if (!c) continue;
+                var dx = target.x - c.x;
+                var dy = target.y - c.y;
+                var d = Math.hypot(dx, dy) || 1;
+                var m = Math.min(3.2, d / 40);
+                pupils[i].style.transform = 'translate(' + (dx / d * m).toFixed(1) + 'px,' + (dy / d * m).toFixed(1) + 'px)';
+            }
+        }
+
+        measure();
+        window.addEventListener('resize', measure);
+        window.addEventListener('load', function () { setTimeout(measure, 2600); });
+        mascots.forEach(function (m) { m.addEventListener('animationend', measure); });
+
+        function lookAtEmail() {
+            if (!email) return;
+            var r = email.getBoundingClientRect();
+            var x = r.left + Math.min(r.width - 24, 16 + email.value.length * 8.5);
+            look(x, r.top + r.height / 2);
+        }
+
+        if (!reduce) {
+            document.addEventListener('mousemove', function (e) {
+                if (!shy) look(e.clientX, e.clientY);
+            }, { passive: true });
+        }
+
+        /* ---------- Form reactions ---------- */
+        if (email) {
+            email.addEventListener('focus', function () { shy = false; body.classList.remove('is-shy'); lookAtEmail(); });
+            email.addEventListener('input', lookAtEmail);
+        }
+        if (pass) {
+            pass.addEventListener('focus', function () { shy = true; body.classList.add('is-shy'); });
+            pass.addEventListener('blur', function () { shy = false; body.classList.remove('is-shy'); });
+        }
+
+        /* ---------- Click: jump + sparkles ---------- */
+        function sparkle(m) {
+            if (reduce) return;
+            for (var i = 0; i < 6; i++) {
+                var s = document.createElement('span');
+                s.className = 'sparkle';
+                s.style.setProperty('--dx', (Math.random() * 120 - 60).toFixed(0) + 'px');
+                s.style.setProperty('--dy', (Math.random() * -90 - 10).toFixed(0) + 'px');
+                s.style.background = i % 2 ? '#d8b27a' : '#f4a6b4';
+                m.appendChild(s);
+                setTimeout(function (el) { el.remove(); }, 800, s);
+            }
+        }
+
+        mascots.forEach(function (m) {
+            m.addEventListener('click', function () {
+                m.classList.remove('is-jump');
+                void m.offsetWidth;
+                m.classList.add('is-jump');
+                sparkle(m);
+            });
+        });
+    })();
+</script>
 </body>
 </html>
