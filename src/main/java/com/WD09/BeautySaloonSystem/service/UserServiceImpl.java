@@ -134,9 +134,9 @@ public class UserServiceImpl implements UserService {
             customer.setLoyaltyPoints(currentPoints + pointsEarned);
 
 // 3. Automatically upgrade Tier based on cumulative spent amount
-            if (newTotalSpent >= 500.0) {
+            if (newTotalSpent >= 200000.0) {
                 customer.setMembershipTier("PLATINUM");
-            } else if (newTotalSpent >= 200.0) {
+            } else if (newTotalSpent >= 50000.0) {
                 customer.setMembershipTier("GOLD");
             } else {
                 customer.setMembershipTier("SILVER");
