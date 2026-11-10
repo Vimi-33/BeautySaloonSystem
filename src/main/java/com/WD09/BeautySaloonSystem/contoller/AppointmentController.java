@@ -77,8 +77,13 @@ public class AppointmentController {
         try {
             Appointment appointment = appointmentService.getAppointmentById(id);
 
-            // Prevent double reward processing if appointment is already ACCEPTED
-            if ("ACCEPTED".equalsIgnoreCase(appointment.getStatus()) && "ACCEPTED".equalsIgnoreCase(status)) {
+            String current = appointment.getStatus() == null
+                    ? "" : appointment.getStatus().trim().toUpperCase();
+            boolean alreadyAccepted = "ACCEPTED".equals(current) || "CONFIRMED".equals(current);
+            boolean requestingAccept = "ACCEPTED".equalsIgnoreCase(status) || "CONFIRMED".equalsIgnoreCase(status);
+
+            // Prevent double reward processing if appointment is already accepted
+            if (alreadyAccepted && requestingAccept) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Appointment #" + id + " is already accepted.");
                 return "redirect:/admin/appointments";
             }
@@ -86,8 +91,9 @@ public class AppointmentController {
             // 1. Update appointment status in database
             appointmentService.updateAppointmentStatus(id, status);
 
-            // 2. Automatically trigger customer rewards (total spent, loyalty points, tier) if status is ACCEPTED
-            if ("ACCEPTED".equalsIgnoreCase(status) && appointment.getCustomer() != null) {
+            // 2. Trigger customer rewards (total spent, loyalty points, tier) when accepted.
+            //    Uses the stored price, which already includes any VIP surcharge.
+            if (requestingAccept && appointment.getCustomer() != null && appointment.getPrice() != null) {
                 userService.applyAppointmentRewards(appointment.getCustomer().getId(), appointment.getPrice());
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Appointment #" + id + " accepted! Customer metrics and tier updated.");

@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Customer registerCustomer(Customer customer) {
+    public void registerCustomer(Customer customer) {
         if (userRepository.existsByEmail(customer.getEmail())) {
             throw new IllegalArgumentException("Email address is already registered!");
         }
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         customer.setLoyaltyPoints(0);
         customer.setTotalSpent(0.0);
 
-        return userRepository.save(customer);
+        userRepository.save(customer);
     }
 
     @Override
@@ -60,13 +60,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAllCustomers();
     }
 
-    @Override
-    public User updateUserProfile(Long userId, String fullName, String phone) {
-        User user = findById(userId);
-        user.setFullName(fullName);
-        user.setPhone(phone);
-        return userRepository.save(user);
-    }
+
 
     @Override
     public void updateCustomerTier(Long customerId, String newTier) {
@@ -86,6 +80,15 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Cannot delete. User not found with ID: " + userId);
         }
         userRepository.deleteById(userId);
+    }
+    
+    //Method OverLoading
+    @Override
+    public User updateUserProfile(Long userId, String fullName, String phone) {
+        User user = findById(userId);
+        user.setFullName(fullName);
+        user.setPhone(phone);
+        return userRepository.save(user);
     }
 
     @Override

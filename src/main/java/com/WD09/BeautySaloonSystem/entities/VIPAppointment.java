@@ -13,9 +13,10 @@ import lombok.Setter;
 public class VIPAppointment extends Appointment {
 
     private String dedicatedStylist;
+    private static final double VIP_SURCHARGE = 1.15;
 
     @Override
     public Double calculateFinalPrice() {
-        return getPrice() != null ? getPrice() * 1.15 : 0.0;
+        return getPrice() * VIP_SURCHARGE;
     }
 }

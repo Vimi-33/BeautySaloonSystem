@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Appointments - Aurelia Salon</title>
+    <title>My Appointments - Velvet & Rose Salon</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
@@ -48,8 +48,11 @@
                 <td class="cell-service" data-label="Treatment" th:text="${app.serviceName}">Signature Facial</td>
                 <td class="cell-when" data-label="Date &amp; time"
                     th:text="${#temporals.format(app.appointmentDateTime, 'yyyy-MM-dd HH:mm')}">2026-09-20 10:00</td>
+
+                <!-- Displays the stored price from the database -->
                 <td class="cell-price" data-label="Price"
-                    th:text="${'LKR ' + app.calculateFinalPrice()}">LKR 8500.0</td>
+                    th:text="${'LKR ' + app.price}">LKR 8500.0</td>
+
                 <td class="cell-status" data-label="Status">
                     <span class="badge"
                           th:classappend="${'badge-' + #strings.toLowerCase(app.status)}"

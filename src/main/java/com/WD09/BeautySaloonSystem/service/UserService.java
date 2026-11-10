@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface UserService {
-    Customer registerCustomer(Customer customer);
+    void registerCustomer(Customer customer);
     User findByEmail(String email);
     User updateUserProfile(Long userId, String fullName, String phone);
     void updateUserProfile(Long id, String fullName, String email, String phone); // overload, keep the old one too

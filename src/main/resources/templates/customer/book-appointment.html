@@ -71,17 +71,12 @@
 <script>
     function updateCalculatedPrice() {
         const serviceSelect = document.getElementById('serviceSelect');
-        const tierSelect = document.getElementById('tierSelect');
         const priceInput = document.getElementById('priceInput');
 
         const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
         let basePrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
 
-        // Apply 15% surcharge if VIP tier is chosen
-        if (tierSelect.value === 'VIP') {
-            basePrice = basePrice * 1.15;
-        }
-
+        // Just pass the clean base price! The backend entity polymorphism will apply the VIP surcharge.
         priceInput.value = basePrice > 0 ? basePrice.toFixed(2) : '';
     }
 

@@ -7,5 +7,5 @@ public class AppointmentStatus {
     public static final String CANCELLED = "CANCELLED";
     public static final String COMPLETED = "COMPLETED";
 
-    private AppointmentStatus() {} // Prevent instantiation
+    private AppointmentStatus() {}
 }

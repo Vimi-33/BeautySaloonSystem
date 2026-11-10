@@ -2,6 +2,7 @@ package com.WD09.BeautySaloonSystem.contoller;
 
 import com.WD09.BeautySaloonSystem.entities.AdminUser;
 import com.WD09.BeautySaloonSystem.entities.Appointment;
+import com.WD09.BeautySaloonSystem.entities.AppointmentStatus;
 import com.WD09.BeautySaloonSystem.entities.Customer;
 import com.WD09.BeautySaloonSystem.service.AppointmentService;
 import com.WD09.BeautySaloonSystem.service.UserService;
@@ -83,21 +84,32 @@ public class AdminController {
     @PostMapping("/appointments/accept/{id}")
     public String acceptAppointment(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
-            // 1. Fetch appointment details
             Appointment appointment = appointmentService.getAppointmentById(id);
 
-            // Prevent double processing if already accepted
-            if ("ACCEPTED".equalsIgnoreCase(appointment.getStatus())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Appointment #" + id + " is already accepted.");
+            String current = appointment.getStatus() == null
+                    ? "" : appointment.getStatus().trim().toUpperCase();
+
+            // Already accepted/confirmed: stop, no second reward
+            if ("ACCEPTED".equals(current) || AppointmentStatus.CONFIRMED.equals(current)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Appointment #" + id + " is already accepted.");
                 return "redirect:/admin/dashboard?view=appointments";
             }
 
-            // 2. Update status to ACCEPTED
+            // Only pending bookings can be accepted (blocks cancelled/completed ones)
+            if (!AppointmentStatus.PENDING.equals(current)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Only pending appointments can be accepted (current status: " + current + ").");
+                return "redirect:/admin/dashboard?view=appointments";
+            }
+
+            // Service stores ACCEPTED as CONFIRMED
             appointmentService.updateAppointmentStatus(id, "ACCEPTED");
 
-            // 3. Update Customer's Total Spent, Loyalty Points, and Tier
+            // Rewards use the stored price (already includes any VIP surcharge)
             if (appointment.getCustomer() != null && appointment.getPrice() != null) {
-                userService.applyAppointmentRewards(appointment.getCustomer().getId(), appointment.getPrice());
+                userService.applyAppointmentRewards(
+                        appointment.getCustomer().getId(), appointment.getPrice());
             }
 
             redirectAttributes.addFlashAttribute("successMessage",
